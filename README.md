@@ -1,2 +1,2 @@
-# timking.github.io
+# blog
 my blog
