@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="">
+<head>
+	<meta charset="utf-8"/>
+	<title>小花园 Search </title>
+
+	<meta name="author" content="timkingnf" />
+	<meta name="copyright" content="timkingnf" />
+
+	<meta property="og:site_name" content="小花园" />
+
+
+
+	<meta name="HandheldFriendly" content="True" />
+	<meta name="MobileOptimized" content="320" />
+	<meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0" />
+	<link rel="shortcut icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link rel="icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link href='https://fonts.googleapis.com/css?family=Droid+Sans:700,400|Droid+Sans+Mono' rel='stylesheet' type='text/css' />
+	<link rel="stylesheet" href="https://timkingnf.github.io/blog/theme/css/main.css" type="text/css" />
+
+	<!--[if lt IE 9]>
+		<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+<link rel="stylesheet" href="https://timkingnf.github.io/blog/theme/tipuesearch/tipuesearch.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://timkingnf.github.io/blog/theme/js/require.js"></script>
+<script>
+    requirejs.config({
+        baseUrl: "theme",
+        paths: {
+            "tipuesearch_set": 'tipuesearch/tipuesearch_set',
+            "tipuesearch_content": 'js/tipuesearch_content',
+            "tipuesearch": 'tipuesearch/tipuesearch.min',
+        },
+    });
+    require(
+        ["tipuesearch_content", "tipuesearch_set", "tipuesearch"],
+        function(){
+            // 本地搜索
+            $('#tipue_search_input').tipuesearch({
+                show: 8, // 一页显示8个
+                wholeWords: false, // 中文搜索需要设置为false
+                showTitleCount: false, // 搜索结果个数无需展示
+            });
+
+            function getURLP(name) {
+                var locSearch = location.search;
+                var splitted = (new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(locSearch) || [, ""]);
+                var searchString = splitted[1].replace(/\+/g, '%20');
+                try {
+                    searchString = decodeURIComponent(searchString);
+                }
+                catch (e) {
+                    searchString = unescape(searchString);
+                }
+                return searchString || null;
+            }
+
+            // 填写搜索内容
+            $("#tipue_search_input").html(getURLP('q'));
+        }
+    )
+</script>
+
+	<link href="https://timkingnf.github.io/blog/feeds/all.rss.xml" type="application/atom+xml" rel="alternate" title="小花园 RSS Feed" />
+
+</head>
+
+<body>
+	<header class="clearfix" role="banner">
+		<!-- <div class="wrapper">
+			<h1 class="huge">
+				<a href="https://timkingnf.github.io/blog">小花园</a>
+			</h1>
+		</div> -->
+	</header>
+
+<div role="main" class="content clearfix">
+    <div class="wrapper main search_warpper">
+        <h2>Posts article under Search: </h2>
+
+        <div class="tipue_search_group">
+            <input type="text" name="q" id="tipue_search_input" pattern=".{3,}" title="At least 3 characters" required>
+            <button type="submit" class="tipue_search_button">
+                <div class="tipue_search_icon">&#9906;</div>
+            </button>
+        </div>
+
+        <div id="tipue_search_content"></div>
+    </div>
+</div>
+
+	<a href="#" class="scoll-top"></a>
+
+	<!-- <footer class="clearfix">
+
+		<a href="#" class="scoll-top"></a>
+
+	</footer> -->
+
+	<script>
+	  var _gaq=[['_setAccount','UA-120924939-1'],['_trackPageview']];
+	  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+	  g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+	  s.parentNode.insertBefore(g,s)}(document,'script'));
+	</script>
+
+</body>
+</html>

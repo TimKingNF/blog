@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="">
+<head>
+	<meta charset="utf-8"/>
+	<title>高性能python-性能分析 - 小花园</title>
+
+	<meta name="author" content="timking" />
+	<meta name="copyright" content="timking" />
+
+	<meta property="og:site_name" content="小花园" />
+
+
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="高性能python-性能分析" />
+	<meta name="date" content="2018-06-10 11:55:00+08:00" />
+	<meta property="og:type" content="article" />
+	<meta property="og:locale" content="en" />
+	<meta property="og:published_time" content="2018-06-10 11:55:00+08:00" />
+	<meta property="og:title" content="高性能python-性能分析" />
+	<meta property="og:url" content="https://timkingnf.github.io/blog/high_performance_python_section1.html" />
+	<meta property="og:description" content="对 «Python高性能分析» 的第二章的学习笔记, 简要描述了一些python中的性能分析手段。" />
+	<meta name="description" content="对 «Python高性能分析» 的第二章的学习笔记, 简要描述了一些python中的性能分析手段。" />
+
+	<meta name="HandheldFriendly" content="True" />
+	<meta name="MobileOptimized" content="320" />
+	<meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0" />
+	<link rel="shortcut icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link rel="icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link href='https://fonts.googleapis.com/css?family=Droid+Sans:700,400|Droid+Sans+Mono' rel='stylesheet' type='text/css' />
+	<link rel="stylesheet" href="https://timkingnf.github.io/blog/theme/css/main.css" type="text/css" />
+
+	<!--[if lt IE 9]>
+		<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script src="https://cdn.rawgit.com/leafo/sticky-kit/v1.1.2/jquery.sticky-kit.min.js"></script>
+<script src="https://timkingnf.github.io/blog/theme/js/require.js"></script>
+<script type="text/javascript">
+	requirejs.config({
+		baseUrl: "theme",
+		paths: {
+			"plotly-latest": 'js/plotly-latest.min',
+			"embed-amd": "js/embed-amd",
+		},
+	});
+	require(
+		['plotly-latest', "embed-amd"],
+		function(){
+			// 固定元素
+			$(".toc, .search_warpper").stick_in_parent({
+				parent: ".content"
+			});
+		}
+	)
+</script>
+
+	<link href="https://timkingnf.github.io/blog/feeds/all.rss.xml" type="application/atom+xml" rel="alternate" title="小花园 RSS Feed" />
+
+</head>
+
+<body>
+	<header class="clearfix" role="banner">
+		<!-- <div class="wrapper">
+			<h1 class="huge">
+				<a href="https://timkingnf.github.io/blog">小花园</a>
+			</h1>
+		</div> -->
+	</header>
+
+<div role="main" class="content clearfix">
+	<article>
+		<div class="post wrapper">
+			<h1>高性能python-性能分析</h1>
+			<p>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>这里是对 &laquo;Python高性能分析&raquo; 的文章解析。<br/>
+将会引用来自书中的代码, 添加一些个人的理解备注, 作为学习笔记使用。</p>
+<blockquote><p><a href="https://github.com/mynameisfiber/high_performance_python">引用代码</a></p>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="计算Julia集合">计算Julia集合<a class="anchor-link" href="#计算Julia集合">&para;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">time</span> 
+
+<span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.8</span><span class="p">,</span> <span class="mf">1.8</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.8</span><span class="p">,</span> <span class="mf">1.8</span> 
+<span class="n">c_real</span><span class="p">,</span> <span class="n">c_imag</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.62772</span><span class="p">,</span> <span class="o">-.</span><span class="mi">42193</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">calculate_z_serial_purepython</span><span class="p">(</span><span class="n">maxiter</span><span class="p">,</span> <span class="n">zs</span><span class="p">,</span> <span class="n">cs</span><span class="p">):</span>
+    <span class="sd">"""Calculate output list using Julia update rule"""</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">zs</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">zs</span><span class="p">)):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">zs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">cs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">maxiter</span><span class="p">:</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">z</span> <span class="o">*</span> <span class="n">z</span> <span class="o">+</span> <span class="n">c</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span>
+    <span class="k">return</span> <span class="n">output</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">calc_pure_python</span><span class="p">(</span><span class="n">desired_width</span><span class="p">,</span> <span class="n">max_iterations</span><span class="p">):</span>
+    <span class="sd">''' 获取两个常数数组， x从x1 到 x2 均匀递增， y从y2 到 y1 均匀递减'''</span>
+    <span class="n">x_step</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x2</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">desired_width</span><span class="p">))</span>
+    <span class="n">y_step</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">y2</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">desired_width</span><span class="p">))</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ycoord</span> <span class="o">=</span> <span class="n">y2</span>
+    <span class="k">while</span> <span class="n">ycoord</span> <span class="o">&gt;</span> <span class="n">y1</span><span class="p">:</span>
+        <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ycoord</span><span class="p">)</span>
+        <span class="n">ycoord</span> <span class="o">+=</span> <span class="n">y_step</span>
+    <span class="n">xcoord</span> <span class="o">=</span> <span class="n">x1</span>
+    <span class="k">while</span> <span class="n">xcoord</span> <span class="o">&lt;</span> <span class="n">x2</span><span class="p">:</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xcoord</span><span class="p">)</span>
+        <span class="n">xcoord</span> <span class="o">+=</span> <span class="n">x_step</span>
+    <span class="sd">''' 为图像中的每个格子构建一个复数值 '''</span>
+    <span class="n">zs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ycoord</span> <span class="ow">in</span> <span class="n">y</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">xcoord</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
+            <span class="n">zs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">complex</span><span class="p">(</span><span class="n">xcoord</span><span class="p">,</span> <span class="n">ycoord</span><span class="p">))</span>
+            <span class="n">cs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">complex</span><span class="p">(</span><span class="n">c_real</span><span class="p">,</span> <span class="n">c_imag</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Length of x:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Total elements:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">zs</span><span class="p">))</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">calculate_z_serial_purepython</span><span class="p">(</span><span class="n">max_iterations</span><span class="p">,</span> <span class="n">zs</span><span class="p">,</span> <span class="n">cs</span><span class="p">)</span>
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">secs</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">calculate_z_serial_purepython</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">" took"</span><span class="p">,</span> <span class="n">secs</span><span class="p">,</span> <span class="s2">"seconds"</span><span class="p">)</span>
+
+    <span class="c1"># This sum is expected for a 1000^2 grid with 300 iterations.</span>
+    <span class="c1"># It catches minor errors we might introduce when we're</span>
+    <span class="c1"># working on a fixed set of inputs.</span>
+    <span class="k">assert</span> <span class="nb">sum</span><span class="p">(</span><span class="n">output</span><span class="p">)</span> <span class="o">==</span> <span class="mi">33219980</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">calc_pure_python</span><span class="p">(</span><span class="n">desired_width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">max_iterations</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Length of x: 1000
+Total elements: 1000000
+calculate_z_serial_purepython took 8.289915800094604 seconds
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>在以上这段代码中，可以看出函数的执行时间在 8s 左右。这里边有值得一提的是 我们可以通过装饰器构造一个方法来计算方法的执行时间。<br/>
+就像下面这样。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">wraps</span>
+
+<span class="k">def</span> <span class="nf">timefn</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">measure_time</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s2">"@timefn:"</span> <span class="o">+</span> <span class="n">fn</span><span class="o">.</span><span class="n">func_name</span> <span class="o">+</span> <span class="s2">" took "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" seconds"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">return</span> <span class="n">measure_time</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>但不可避免的是，这样的方法总是要在源代码上添加一些代码，我们可以通过以下方法来获取一个函数的执行时间。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="计算代码执行时长">计算代码执行时长<a class="anchor-link" href="#计算代码执行时长">&para;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>我们可以通过几种办法获取一个函数的具体执行时长。</p>
+<ul>
+<li>python代码使用 timeit 模块<div class="highlight"><pre><span></span>python -m timeit -n <span class="m">5</span> -r <span class="m">5</span> -s <span class="s2">"&lt;some code&gt;"</span>
+</pre></div>
+这将会通过-n 执行循环次数, -r 指定重复次数，通过重复执行获取最好的结果</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<ul>
+<li>unix 下使用 time 命令<div class="highlight"><pre><span></span>/usr/bin/time -p python <span class="s2">"&lt;file&gt;"</span>
+</pre></div>
+这将会返回三个值， real 记录整体耗时， user 记录cpu在任务执行上消耗的时长， sys 记录cpu在调度过程内核函数消耗的时长</li>
+</ul>
+<blockquote><p>这里可以通过添加参数 --verbose 获取更加详细的结果。<br/>
+其中 <code>Major (requiring I/O) page faults</code> 指标表示 任务在磁盘IO上消耗的时长，这个值会造成 <code>user + sys = real</code> 的较大偏差</p>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<ul>
+<li>ipython 下使用 %timeit 魔法命令<blockquote><p>这个命令和 python 的 timeit 模块效果是一致的，区别是需要在 ipython 环境下执行</p>
+</blockquote>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="使用cProfile模块">使用cProfile模块<a class="anchor-link" href="#使用cProfile模块">&para;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>我们可以通过以下命令来调用cProfile模块获得代码中的每个函数的调用统计。<br/>
+这其中包括 Ncalls 调用次数， cumtime 函数耗时时长， tottime 函数内部没有调用函数的其他代码的耗时时长。</p>
+<div class="highlight"><pre><span></span>python -m cProfile -s cumulative -o profile.stats julia_nopil.py
+</pre></div>
+<blockquote><p>-s cumulative 对函数时间进行排序<br/>
+-o 输出文件， 可以通过以下命令读取统计文件</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pstats</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">pstats</span><span class="o">.</span><span class="n">Stats</span><span class="p">(</span><span class="s2">"profile.stats"</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">sort_stats</span><span class="p">(</span><span class="s2">"cumulative"</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">print_stats</span><span class="p">()</span>
+</pre></div>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="使用可视化工具对cProfile的输出进行可视化">使用可视化工具对cProfile的输出进行可视化<a class="anchor-link" href="#使用可视化工具对cProfile的输出进行可视化">&para;</a></h2><p>有时候查看cProfile的文件还是太过麻烦，这时就可以通过相应的可视化工具进行输出，这样更加直观方便。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>python3 -m cProfile -s cumulative -o profile.stats julia_nopil.py
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Length of x: 1000
+Total elements: 1000000
+calculate_z_serial_purepython took 12.32185983657837 seconds
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="使用gprof2dot对文件进行可视化分析">使用gprof2dot对文件进行可视化分析<a class="anchor-link" href="#使用gprof2dot对文件进行可视化分析">&para;</a></h3><p>使用前可以通过 <code>pip install gprof2dot</code> 来安装</p>
+<blockquote><p><a href="https://github.com/jrfonseca/gprof2dot">文档</a></p>
+</blockquote>
+<p>gprof2dot可以将将多种Profiler的数据转成Graphviz可处理的图像表述。<br/>
+配合dot命令，即可得到不同函数所消耗的时间分析图。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>gprof2dot -f pstats profile.stats <span class="p">|</span> dot -Tpng -o ../../../images/high-performance-python/section-2/profile.png
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>得到下图. 从图中可以看出各个函数往下执行的调用占比。
+<img alt="profile.png" src="https://timkingnf.github.io/blog/images/high-performance-python/section-2/profile.png"/></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="使用-vprof-进行可视化分析">使用 vprof 进行可视化分析<a class="anchor-link" href="#使用-vprof-进行可视化分析">&para;</a></h3><p>通过<code>pip install vprof</code>安装</p>
+<blockquote><p><a href="https://github.com/nvdv/vprof">文档</a></p>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>vprof -c c julia_nopil.py # 这里将会执行启动一个web server，在浏览器上展示分析的结果
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Running FlameGraphProfiler...
+Length of x: 1000
+Total elements: 1000000
+calculate_z_serial_purepython took 8.433602094650269 seconds
+Starting HTTP server...
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="RunSnakeRun">RunSnakeRun<a class="anchor-link" href="#RunSnakeRun">&para;</a></h3><div class="highlight"><pre><span></span><span class="c1"># TODO(timking): 补充RunSnakeRun的分析方法</span>
+</pre></div>
+<p>这里还有一种方法可以使用，书中原文可以使用的这一种。但我暂时没有找到方法，暂时搁置。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="使用LineProfiler进行逐行分析_1">使用LineProfiler进行逐行分析<a class="anchor-link" href="#使用LineProfiler进行逐行分析">&para;</a></h2><p>在上文我们找到耗时占比较大的函数之后。就可以通过 line_profile 来进行逐行分析。<br/>
+使用 <code>pip install line_profiler</code>安装模块之后。<br/>
+我们需要修改代码文件。在需要分析的函数处添加装饰器 <code>@profile</code></p>
+<p>这里我们标记耗时较长的 calculate_z_serial_purepython 函数</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>kernprof -l -v julia_lineprofiler.py
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Length of x: 1000
+Total elements: 1000000
+calculate_z_serial_purepython took 92.4572069644928 seconds
+Wrote profile results to julia_lineprofiler.py.lprof
+Timer unit: 1e-06 s
+
+Total time: 53.5594 s
+File: julia_lineprofiler.py
+Function: calculate_z_serial_purepython at line 7
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+     7                                           @profile
+     8                                           def calculate_z_serial_purepython(maxiter, zs, cs):
+     9                                               """Calculate output list using Julia update rule"""
+    10         1       4121.0   4121.0      0.0      output = [0] * len(zs)
+    11   1000001     427083.0      0.4      0.8      for i in range(len(zs)):
+    12   1000000     403721.0      0.4      0.8          n = 0
+    13   1000000     479455.0      0.5      0.9          z = zs[i]
+    14   1000000     446756.0      0.4      0.8          c = cs[i]
+    15  34219980   20103258.0      0.6     37.5          while abs(z) &lt; 2 and n &lt; maxiter:
+    16  33219980   16408962.0      0.5     30.6              z = z * z + c
+    17  33219980   14826327.0      0.4     27.7              n += 1
+    18   1000000     459676.0      0.5      0.9          output[i] = n
+    19         1          0.0      0.0      0.0      return output
+
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>从上面的输出看出，主要消耗时间集中在 while 循环中。<br/>
+while判断 甚至两行赋值语句，都因为循环了 34219980次 而导致占比时间均在 30%左右。</p>
+<blockquote><p>while 判断中是两个表达式，无从判断两个表达式何者占用的时间更慢<br/>
+但是通过推导可知，函数会比单纯的逻辑表达式更慢。<br/>
+在while表达式之后，我们可以通过调整 两个表达式的先后顺序，使得第一次判断的时间减少<br/>
+理论上将优化一定的性能，而书中的结果也印证了这一点</p>
+<p>在对整体对函数<code>calc_pure_python</code>分析中，引用书上的结果，<br/>
+<code>calculate_z_serial_purepython</code>占用了97%的时间，可见创建列表的耗时在此次无足轻重</p>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="分析内存用量">分析内存用量<a class="anchor-link" href="#分析内存用量">&para;</a></h2><p>书上提到了使用memory_profiler 分析的方法，但是在实际生产环境中， memory_profiler会导致代码的执行效率急剧降低，这是不可忍受的。<br/>
+好在我们可以通过Ipython的 <code>%memit</code> 来分析 某些语句的 RAM使用情况。</p>
+<p>这些内容将会在后续章节中说明。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="分析堆上的对象使用内存">分析堆上的对象使用内存<a class="anchor-link" href="#分析堆上的对象使用内存">&para;</a></h2><p>依照书上提供的 <code>guppy</code> 库好像无法在python3环境下工作。<br/>
+只能退而求次使用另一个分析内存的工具 <code>objgraph</code></p>
+<blockquote><p><a href="https://mg.pov.lt/objgraph/">文档</a></p>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="单元测试">单元测试<a class="anchor-link" href="#单元测试">&para;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>cat ex.py
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>import unittest
+
+
+@profile
+def some_fn(nbr):
+    return nbr * 2
+
+
+class TestCase(unittest.TestCase):
+    def test(self):
+        result = some_fn(2)
+        self.assertEquals(result, 4)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>对上述代码进行单元测试</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>nosetests ex.py
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>.
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+OK
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</p>
+
+			<!-- <a href="https://twitter.com/share" class="twitter-share-button" data-via="" data-lang="en" data-size="large" data-related="">Tweet</a>
+			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script> -->
+
+			<div class="page-nav">
+				<a class="btn left" href="https://timkingnf.github.io/blog/jupyter_describe.html">
+					← Jupyter Notebook Learning
+				</a>
+				<a class="btn right" href="https://timkingnf.github.io/blog/high_performance_python_section2.html">
+					高性能python-选择合适的数据结构 ➡
+				</a>
+			</div>
+
+			<div class="comments">
+				<h2>Comments !</h2>
+			    <div id="disqus_thread"></div>
+			    <script type="text/javascript">
+			       var disqus_identifier = "high_performance_python_section1.html";
+			       (function() {
+			       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+			       dsq.src = 'https://https-timkingnf-github-io-blog.disqus.com/embed.js';
+			       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+			      })();
+				</script>
+			</div>
+		</div>
+
+<div class="wrapper meta">
+	<ul class="nav">
+		<li><a href="https://timkingnf.github.io/blog/index.html">Home</a></li>
+		<li><a href="https://timkingnf.github.io/blog/archives.html">Archive</a></li>
+		<li><a href="https://timkingnf.github.io/blog/Tags.html">Tags</a></li>
+		<li><a href="https://timkingnf.github.io/blog/Categories.html">Categories</a></li>
+
+		<li><a href="https://github.com/TimKingNF">GitHub</a></li>
+	</ul>
+
+	<div class="search_warpper">
+		<h2>Search</h2>
+		<form action="https://timkingnf.github.io/blog/search.html">
+			<div class="tipue_search_group">
+			<input type="text" name="q" class="search_text" pattern=".{3,}" title="At least 3 characters" required>
+			</div>
+		</form>
+
+		<div id="tipue_search_content"></div>
+	</div>
+</div>
+
+<div class="meta wrapper">
+	<time datetime="2018-06-10T11:55:00+08:00" pubdate>
+		2018-06-10
+	</time>
+
+	Last modified:
+	<time datetime="2018-06-16T00:00:00+08:00" pubdate>
+		2018-06-16
+	</time>
+
+	<ul class="tag clearfix">
+		<li><a href="https://timkingnf.github.io/blog/category/python.html">Python</a></li>
+
+	</ul>
+
+	<ul class="tag clearfix">
+				<li><a href="https://timkingnf.github.io/blog/tag/xing-neng-fen-xi.html">性能分析</a></li>
+	</ul>
+
+	<nav class="toc">
+		<div id="toc"><ul><li><a class="toc-href" href="#计算Julia集合" title="计算Julia集合&para;">计算Julia集合&para;</a></li><li><a class="toc-href" href="#计算代码执行时长" title="计算代码执行时长&para;">计算代码执行时长&para;</a></li><li><a class="toc-href" href="#使用cProfile模块" title="使用cProfile模块&para;">使用cProfile模块&para;</a></li><li><a class="toc-href" href="#使用可视化工具对cProfile的输出进行可视化" title="使用可视化工具对cProfile的输出进行可视化&para;">使用可视化工具对cProfile的输出进行可视化&para;</a><ul><li><a class="toc-href" href="#使用gprof2dot对文件进行可视化分析" title="使用gprof2dot对文件进行可视化分析&para;">使用gprof2dot对文件进行可视化分析&para;</a></li><li><a class="toc-href" href="#使用-vprof-进行可视化分析" title="使用 vprof 进行可视化分析&para;">使用 vprof 进行可视化分析&para;</a></li><li><a class="toc-href" href="#RunSnakeRun" title="RunSnakeRun&para;">RunSnakeRun&para;</a></li></ul></li><li><a class="toc-href" href="#使用LineProfiler进行逐行分析_1" title="使用LineProfiler进行逐行分析&para;">使用LineProfiler进行逐行分析&para;</a></li><li><a class="toc-href" href="#分析内存用量" title="分析内存用量&para;">分析内存用量&para;</a></li><li><a class="toc-href" href="#分析堆上的对象使用内存" title="分析堆上的对象使用内存&para;">分析堆上的对象使用内存&para;</a></li><li><a class="toc-href" href="#单元测试" title="单元测试&para;">单元测试&para;</a></li></ul></div>
+	</nav>
+</div>
+
+	</article>
+</div>
+
+	<a href="#" class="scoll-top"></a>
+
+	<!-- <footer class="clearfix">
+
+		<a href="#" class="scoll-top"></a>
+
+	</footer> -->
+
+	<script>
+	  var _gaq=[['_setAccount','UA-120924939-1'],['_trackPageview']];
+	  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+	  g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+	  s.parentNode.insertBefore(g,s)}(document,'script'));
+	</script>
+
+</body>
+</html>

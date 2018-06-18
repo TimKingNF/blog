@@ -1,1079 +1,84 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="author" content="timking" />
-    <meta name="robots" content="index, follow"/>
+	<meta charset="utf-8"/>
+	<title>高性能python-选择合适的数据结构 - 小花园</title>
 
-    <meta property="og:title" content="高性能python-性能分析"/>
-    <meta property="og:url" content="https://timkingnf.github.io/blog/high_performance_python_section2.html"/>
-    <meta property="og:site_name" content="小花园"/>
-    <meta property="og:type" content="article"/>
+	<meta name="author" content="timking" />
+	<meta name="copyright" content="timking" />
 
-    <link rel="canonical" href="https://timkingnf.github.io/blog/high_performance_python_section2.html" />
+	<meta property="og:site_name" content="小花园" />
 
-    <title>高性能python-性能分析 | 小花园</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" />
-    <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" />
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="高性能python-选择合适的数据结构" />
+	<meta name="date" content="2018-06-16 12:56:00+08:00" />
+	<meta property="og:type" content="article" />
+	<meta property="og:locale" content="en" />
+	<meta property="og:published_time" content="2018-06-16 12:56:00+08:00" />
+	<meta property="og:title" content="高性能python-选择合适的数据结构" />
+	<meta property="og:url" content="https://timkingnf.github.io/blog/high_performance_python_section2.html" />
+	<meta property="og:description" content="对 «Python高性能分析» 的第三、四章的学习笔记, 介绍了python中的一些数据结构，并简单介绍了这些数据结果在使用中容易造成性能瓶颈的地方，了解其本身的机制，才能更好的实现性能上的优化。" />
+	<meta name="description" content="对 «Python高性能分析» 的第三、四章的学习笔记, 介绍了python中的一些数据结构，并简单介绍了这些数据结果在使用中容易造成性能瓶颈的地方，了解其本身的机制，才能更好的实现性能上的优化。" />
 
-    <link rel="stylesheet" type="text/css" href="https://timkingnf.github.io/blog/theme/css/main.css" />
-    <link href="https://timkingnf.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="小花园 Atom Feed" />
+	<meta name="HandheldFriendly" content="True" />
+	<meta name="MobileOptimized" content="320" />
+	<meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0" />
+	<link rel="shortcut icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link rel="icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link href='https://fonts.googleapis.com/css?family=Droid+Sans:700,400|Droid+Sans+Mono' rel='stylesheet' type='text/css' />
+	<link rel="stylesheet" href="https://timkingnf.github.io/blog/theme/css/main.css" type="text/css" />
 
-    <script type="text/javascript">var switchTo5x=true;</script>
-    <script type="text/javascript" src="https://timkingnf.github.io/blog/theme/js/buttons.js"></script>
-    <script type="text/javascript">
-        stLight.options({
-            publisher: "",
-            doNotHash: false,
-            doNotCopy: false,
-            hashAddressBar: false
-        });
-    </script>
-    <script src="//code.jquery.com/jquery.min.js"></script>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/2.3.2/js/bootstrap.min.js"></script>
-    <script src="https://timkingnf.github.io/blog/theme/js/require.js"></script>
-    <script type="text/javascript">
-        requirejs.config({
-            baseUrl: 'theme/js',
-            paths: {
-                "plotly-latest": 'plotly-latest.min',
-            }
-        });
-        require(
-            ['plotly-latest', "embed-amd"],
-            function(){}
-        )
-    </script>
+	<!--[if lt IE 9]>
+		<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script src="https://cdn.rawgit.com/leafo/sticky-kit/v1.1.2/jquery.sticky-kit.min.js"></script>
+<script src="https://timkingnf.github.io/blog/theme/js/require.js"></script>
+<script type="text/javascript">
+	requirejs.config({
+		baseUrl: "theme",
+		paths: {
+			"plotly-latest": 'js/plotly-latest.min',
+			"embed-amd": "js/embed-amd",
+		},
+	});
+	require(
+		['plotly-latest', "embed-amd"],
+		function(){
+			// 固定元素
+			$(".toc, .search_warpper").stick_in_parent({
+				parent: ".content"
+			});
+		}
+	)
+</script>
+
+	<link href="https://timkingnf.github.io/blog/feeds/all.rss.xml" type="application/atom+xml" rel="alternate" title="小花园 RSS Feed" />
+
 </head>
 
-<body id="index">
-    <div class="row-fluid">
-        <div class="span10 offset1">
-            <header id="banner" >
-                <!-- <h1>
-                    <a href="https://timkingnf.github.io/blog/">小花园 </a>
-                </h1> -->
-                <nav class="navbar">
-                    <div class="navbar-inner">
-                        <ul class="nav">
-                            <li >
-                                <a href="https://timkingnf.github.io/blog/index.html">Home</a>
-                            </li>
-                            <li class="active"><a href="https://timkingnf.github.io/blog/category/python.html">Python</a></li>
-                            <li ><a href="https://timkingnf.github.io/blog/category/shi-yi.html">拾遗</a></li>
-                        </ul>
+<body>
+	<header class="clearfix" role="banner">
+		<!-- <div class="wrapper">
+			<h1 class="huge">
+				<a href="https://timkingnf.github.io/blog">小花园</a>
+			</h1>
+		</div> -->
+	</header>
 
-                    </div>
-                </nav>
-            </header><!-- /#banner -->
-        </div>
-    </div>
-
-    <div class="row-fluid">
-        <div class="span10 offset1">
-            <div class="row-fluid">
-<div class="span10 offset1">
-  <section>
-    <article>
-      <header>
-        <h1 class="entry-title">
-          <a href="https://timkingnf.github.io/blog/high_performance_python_section2.html" rel="bookmark"
-             title="Permalink to 高性能python-性能分析">高性能python-性能分析</a></h1>
-      </header>
-      <div class="entry-content">
-<footer class="post-info">
-
-    Posts in <a href="https://timkingnf.github.io/blog/category/python.html">Python</a>
-
-    on 2018-06-10
-
-        |
-        Tags:         <a href="https://timkingnf.github.io/blog/tag/python-xing-neng-fen-xi.html">python 性能分析</a>
-
-
-
-    
-</footer><!-- /.post-info -->
-
-        <style type="text/css">/*!
-*
-* IPython notebook
-*
-*/
-/* CSS font colors for translated ANSI colors. */
-.ansibold {
-  font-weight: bold;
-}
-/* use dark versions for foreground, to improve visibility */
-.ansiblack {
-  color: black;
-}
-.ansired {
-  color: darkred;
-}
-.ansigreen {
-  color: darkgreen;
-}
-.ansiyellow {
-  color: #c4a000;
-}
-.ansiblue {
-  color: darkblue;
-}
-.ansipurple {
-  color: darkviolet;
-}
-.ansicyan {
-  color: steelblue;
-}
-.ansigray {
-  color: gray;
-}
-/* and light for background, for the same reason */
-.ansibgblack {
-  background-color: black;
-}
-.ansibgred {
-  background-color: red;
-}
-.ansibggreen {
-  background-color: green;
-}
-.ansibgyellow {
-  background-color: yellow;
-}
-.ansibgblue {
-  background-color: blue;
-}
-.ansibgpurple {
-  background-color: magenta;
-}
-.ansibgcyan {
-  background-color: cyan;
-}
-.ansibggray {
-  background-color: gray;
-}
-div.cell {
-  /* Old browsers */
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-box-align: stretch;
-  display: -moz-box;
-  -moz-box-orient: vertical;
-  -moz-box-align: stretch;
-  display: box;
-  box-orient: vertical;
-  box-align: stretch;
-  /* Modern browsers */
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  border-radius: 2px;
-  box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  border-width: 1px;
-  border-style: solid;
-  border-color: transparent;
-  width: 100%;
-  padding: 5px;
-  /* This acts as a spacer between cells, that is outside the border */
-  margin: 0px;
-  outline: none;
-  border-left-width: 1px;
-  padding-left: 5px;
-  background: linear-gradient(to right, transparent -40px, transparent 1px, transparent 1px, transparent 100%);
-}
-div.cell.jupyter-soft-selected {
-  border-left-color: #90CAF9;
-  border-left-color: #E3F2FD;
-  border-left-width: 1px;
-  padding-left: 5px;
-  border-right-color: #E3F2FD;
-  border-right-width: 1px;
-  background: #E3F2FD;
-}
-@media print {
-  div.cell.jupyter-soft-selected {
-    border-color: transparent;
-  }
-}
-div.cell.selected {
-  border-color: #ababab;
-  border-left-width: 0px;
-  padding-left: 6px;
-  background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, transparent 5px, transparent 100%);
-}
-@media print {
-  div.cell.selected {
-    border-color: transparent;
-  }
-}
-div.cell.selected.jupyter-soft-selected {
-  border-left-width: 0;
-  padding-left: 6px;
-  background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 7px, #E3F2FD 7px, #E3F2FD 100%);
-}
-.edit_mode div.cell.selected {
-  border-color: #66BB6A;
-  border-left-width: 0px;
-  padding-left: 6px;
-  background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
-}
-@media print {
-  .edit_mode div.cell.selected {
-    border-color: transparent;
-  }
-}
-.prompt {
-  /* This needs to be wide enough for 3 digit prompt numbers: In[100]: */
-  min-width: 14ex;
-  /* This padding is tuned to match the padding on the CodeMirror editor. */
-  padding: 0.4em;
-  margin: 0px;
-  font-family: monospace;
-  text-align: right;
-  /* This has to match that of the the CodeMirror class line-height below */
-  line-height: 1.21429em;
-  /* Don't highlight prompt number selection */
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  /* Use default cursor */
-  cursor: default;
-}
-@media (max-width: 540px) {
-  .prompt {
-    text-align: left;
-  }
-}
-div.inner_cell {
-  min-width: 0;
-  /* Old browsers */
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-box-align: stretch;
-  display: -moz-box;
-  -moz-box-orient: vertical;
-  -moz-box-align: stretch;
-  display: box;
-  box-orient: vertical;
-  box-align: stretch;
-  /* Modern browsers */
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  /* Old browsers */
-  -webkit-box-flex: 1;
-  -moz-box-flex: 1;
-  box-flex: 1;
-  /* Modern browsers */
-  flex: 1;
-}
-/* input_area and input_prompt must match in top border and margin for alignment */
-div.input_area {
-  border: 1px solid #cfcfcf;
-  border-radius: 2px;
-  background: #f7f7f7;
-  line-height: 1.21429em;
-}
-/* This is needed so that empty prompt areas can collapse to zero height when there
-   is no content in the output_subarea and the prompt. The main purpose of this is
-   to make sure that empty JavaScript output_subareas have no height. */
-div.prompt:empty {
-  padding-top: 0;
-  padding-bottom: 0;
-}
-div.unrecognized_cell {
-  padding: 5px 5px 5px 0px;
-  /* Old browsers */
-  display: -webkit-box;
-  -webkit-box-orient: horizontal;
-  -webkit-box-align: stretch;
-  display: -moz-box;
-  -moz-box-orient: horizontal;
-  -moz-box-align: stretch;
-  display: box;
-  box-orient: horizontal;
-  box-align: stretch;
-  /* Modern browsers */
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-}
-div.unrecognized_cell .inner_cell {
-  border-radius: 2px;
-  padding: 5px;
-  font-weight: bold;
-  color: red;
-  border: 1px solid #cfcfcf;
-  background: #eaeaea;
-}
-div.unrecognized_cell .inner_cell a {
-  color: inherit;
-  text-decoration: none;
-}
-div.unrecognized_cell .inner_cell a:hover {
-  color: inherit;
-  text-decoration: none;
-}
-@media (max-width: 540px) {
-  div.unrecognized_cell > div.prompt {
-    display: none;
-  }
-}
-div.code_cell {
-  /* avoid page breaking on code cells when printing */
-}
-@media print {
-  div.code_cell {
-    page-break-inside: avoid;
-  }
-}
-/* any special styling for code cells that are currently running goes here */
-div.input {
-  page-break-inside: avoid;
-  /* Old browsers */
-  display: -webkit-box;
-  -webkit-box-orient: horizontal;
-  -webkit-box-align: stretch;
-  display: -moz-box;
-  -moz-box-orient: horizontal;
-  -moz-box-align: stretch;
-  display: box;
-  box-orient: horizontal;
-  box-align: stretch;
-  /* Modern browsers */
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-}
-@media (max-width: 540px) {
-  div.input {
-    /* Old browsers */
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-box-align: stretch;
-    display: -moz-box;
-    -moz-box-orient: vertical;
-    -moz-box-align: stretch;
-    display: box;
-    box-orient: vertical;
-    box-align: stretch;
-    /* Modern browsers */
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-/* input_area and input_prompt must match in top border and margin for alignment */
-div.input_prompt {
-  color: #303F9F;
-  border-top: 1px solid transparent;
-}
-div.input_area > div.highlight {
-  margin: 0.4em;
-  border: none;
-  padding: 0px;
-  background-color: transparent;
-}
-div.input_area > div.highlight > pre {
-  margin: 0px;
-  border: none;
-  padding: 0px;
-  background-color: transparent;
-}
-/* The following gets added to the <head> if it is detected that the user has a
- * monospace font with inconsistent normal/bold/italic height.  See
- * notebookmain.js.  Such fonts will have keywords vertically offset with
- * respect to the rest of the text.  The user should select a better font.
- * See: https://github.com/ipython/ipython/issues/1503
- *
- * .CodeMirror span {
- *      vertical-align: bottom;
- * }
- */
-.CodeMirror {
-  line-height: 1.21429em;
-  /* Changed from 1em to our global default */
-  font-size: 14px;
-  height: auto;
-  /* Changed to auto to autogrow */
-  background: none;
-  /* Changed from white to allow our bg to show through */
-}
-.CodeMirror-scroll {
-  /*  The CodeMirror docs are a bit fuzzy on if overflow-y should be hidden or visible.*/
-  /*  We have found that if it is visible, vertical scrollbars appear with font size changes.*/
-  overflow-y: hidden;
-  overflow-x: auto;
-}
-.CodeMirror-lines {
-  /* In CM2, this used to be 0.4em, but in CM3 it went to 4px. We need the em value because */
-  /* we have set a different line-height and want this to scale with that. */
-  padding: 0.4em;
-}
-.CodeMirror-linenumber {
-  padding: 0 8px 0 4px;
-}
-.CodeMirror-gutters {
-  border-bottom-left-radius: 2px;
-  border-top-left-radius: 2px;
-}
-.CodeMirror pre {
-  /* In CM3 this went to 4px from 0 in CM2. We need the 0 value because of how we size */
-  /* .CodeMirror-lines */
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-}
-/*
-
-Original style from softwaremaniacs.org (c) Ivan Sagalaev <Maniac@SoftwareManiacs.Org>
-Adapted from GitHub theme
-
-*/
-.highlight-base {
-  color: #000;
-}
-.highlight-variable {
-  color: #000;
-}
-.highlight-variable-2 {
-  color: #1a1a1a;
-}
-.highlight-variable-3 {
-  color: #333333;
-}
-.highlight-string {
-  color: #BA2121;
-}
-.highlight-comment {
-  color: #408080;
-  font-style: italic;
-}
-.highlight-number {
-  color: #080;
-}
-.highlight-atom {
-  color: #88F;
-}
-.highlight-keyword {
-  color: #008000;
-  font-weight: bold;
-}
-.highlight-builtin {
-  color: #008000;
-}
-.highlight-error {
-  color: #f00;
-}
-.highlight-operator {
-  color: #AA22FF;
-  font-weight: bold;
-}
-.highlight-meta {
-  color: #AA22FF;
-}
-/* previously not defined, copying from default codemirror */
-.highlight-def {
-  color: #00f;
-}
-.highlight-string-2 {
-  color: #f50;
-}
-.highlight-qualifier {
-  color: #555;
-}
-.highlight-bracket {
-  color: #997;
-}
-.highlight-tag {
-  color: #170;
-}
-.highlight-attribute {
-  color: #00c;
-}
-.highlight-header {
-  color: blue;
-}
-.highlight-quote {
-  color: #090;
-}
-.highlight-link {
-  color: #00c;
-}
-/* apply the same style to codemirror */
-.cm-s-ipython span.cm-keyword {
-  color: #008000;
-  font-weight: bold;
-}
-.cm-s-ipython span.cm-atom {
-  color: #88F;
-}
-.cm-s-ipython span.cm-number {
-  color: #080;
-}
-.cm-s-ipython span.cm-def {
-  color: #00f;
-}
-.cm-s-ipython span.cm-variable {
-  color: #000;
-}
-.cm-s-ipython span.cm-operator {
-  color: #AA22FF;
-  font-weight: bold;
-}
-.cm-s-ipython span.cm-variable-2 {
-  color: #1a1a1a;
-}
-.cm-s-ipython span.cm-variable-3 {
-  color: #333333;
-}
-.cm-s-ipython span.cm-comment {
-  color: #408080;
-  font-style: italic;
-}
-.cm-s-ipython span.cm-string {
-  color: #BA2121;
-}
-.cm-s-ipython span.cm-string-2 {
-  color: #f50;
-}
-.cm-s-ipython span.cm-meta {
-  color: #AA22FF;
-}
-.cm-s-ipython span.cm-qualifier {
-  color: #555;
-}
-.cm-s-ipython span.cm-builtin {
-  color: #008000;
-}
-.cm-s-ipython span.cm-bracket {
-  color: #997;
-}
-.cm-s-ipython span.cm-tag {
-  color: #170;
-}
-.cm-s-ipython span.cm-attribute {
-  color: #00c;
-}
-.cm-s-ipython span.cm-header {
-  color: blue;
-}
-.cm-s-ipython span.cm-quote {
-  color: #090;
-}
-.cm-s-ipython span.cm-link {
-  color: #00c;
-}
-.cm-s-ipython span.cm-error {
-  color: #f00;
-}
-.cm-s-ipython span.cm-tab {
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAMCAYAAAAkuj5RAAAAAXNSR0IArs4c6QAAAGFJREFUSMft1LsRQFAQheHPowAKoACx3IgEKtaEHujDjORSgWTH/ZOdnZOcM/sgk/kFFWY0qV8foQwS4MKBCS3qR6ixBJvElOobYAtivseIE120FaowJPN75GMu8j/LfMwNjh4HUpwg4LUAAAAASUVORK5CYII=);
-  background-position: right;
-  background-repeat: no-repeat;
-}
-div.output_wrapper {
-  /* this position must be relative to enable descendents to be absolute within it */
-  position: relative;
-  /* Old browsers */
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-box-align: stretch;
-  display: -moz-box;
-  -moz-box-orient: vertical;
-  -moz-box-align: stretch;
-  display: box;
-  box-orient: vertical;
-  box-align: stretch;
-  /* Modern browsers */
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  z-index: 1;
-}
-/* class for the output area when it should be height-limited */
-div.output_scroll {
-  /* ideally, this would be max-height, but FF barfs all over that */
-  height: 24em;
-  /* FF needs this *and the wrapper* to specify full width, or it will shrinkwrap */
-  width: 100%;
-  overflow: auto;
-  border-radius: 2px;
-  -webkit-box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
-  display: block;
-}
-/* output div while it is collapsed */
-div.output_collapsed {
-  margin: 0px;
-  padding: 0px;
-  /* Old browsers */
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-box-align: stretch;
-  display: -moz-box;
-  -moz-box-orient: vertical;
-  -moz-box-align: stretch;
-  display: box;
-  box-orient: vertical;
-  box-align: stretch;
-  /* Modern browsers */
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
-div.out_prompt_overlay {
-  height: 100%;
-  padding: 0px 0.4em;
-  position: absolute;
-  border-radius: 2px;
-}
-div.out_prompt_overlay:hover {
-  /* use inner shadow to get border that is computed the same on WebKit/FF */
-  -webkit-box-shadow: inset 0 0 1px #000;
-  box-shadow: inset 0 0 1px #000;
-  background: rgba(240, 240, 240, 0.5);
-}
-div.output_prompt {
-  color: #D84315;
-}
-/* This class is the outer container of all output sections. */
-div.output_area {
-  padding: 0px;
-  page-break-inside: avoid;
-  /* Old browsers */
-  display: -webkit-box;
-  -webkit-box-orient: horizontal;
-  -webkit-box-align: stretch;
-  display: -moz-box;
-  -moz-box-orient: horizontal;
-  -moz-box-align: stretch;
-  display: box;
-  box-orient: horizontal;
-  box-align: stretch;
-  /* Modern browsers */
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-}
-div.output_area .MathJax_Display {
-  text-align: left !important;
-}
-div.output_area 
-div.output_area 
-div.output_area img,
-div.output_area svg {
-  max-width: 100%;
-  height: auto;
-}
-div.output_area img.unconfined,
-div.output_area svg.unconfined {
-  max-width: none;
-}
-/* This is needed to protect the pre formating from global settings such
-   as that of bootstrap */
-.output {
-  /* Old browsers */
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-box-align: stretch;
-  display: -moz-box;
-  -moz-box-orient: vertical;
-  -moz-box-align: stretch;
-  display: box;
-  box-orient: vertical;
-  box-align: stretch;
-  /* Modern browsers */
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
-@media (max-width: 540px) {
-  div.output_area {
-    /* Old browsers */
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-box-align: stretch;
-    display: -moz-box;
-    -moz-box-orient: vertical;
-    -moz-box-align: stretch;
-    display: box;
-    box-orient: vertical;
-    box-align: stretch;
-    /* Modern browsers */
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-div.output_area pre {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  vertical-align: baseline;
-  color: black;
-  background-color: transparent;
-  border-radius: 0;
-}
-/* This class is for the output subarea inside the output_area and after
-   the prompt div. */
-div.output_subarea {
-  overflow-x: auto;
-  padding: 0.4em;
-  /* Old browsers */
-  -webkit-box-flex: 1;
-  -moz-box-flex: 1;
-  box-flex: 1;
-  /* Modern browsers */
-  flex: 1;
-  max-width: calc(100% - 14ex);
-}
-div.output_scroll div.output_subarea {
-  overflow-x: visible;
-}
-/* The rest of the output_* classes are for special styling of the different
-   output types */
-/* all text output has this class: */
-div.output_text {
-  text-align: left;
-  color: #000;
-  /* This has to match that of the the CodeMirror class line-height below */
-  line-height: 1.21429em;
-}
-/* stdout/stderr are 'text' as well as 'stream', but execute_result/error are *not* streams */
-div.output_stderr {
-  background: #fdd;
-  /* very light red background for stderr */
-}
-div.output_latex {
-  text-align: left;
-}
-/* Empty output_javascript divs should have no height */
-div.output_javascript:empty {
-  padding: 0;
-}
-.js-error {
-  color: darkred;
-}
-/* raw_input styles */
-div.raw_input_container {
-  line-height: 1.21429em;
-  padding-top: 5px;
-}
-pre.raw_input_prompt {
-  /* nothing needed here. */
-}
-input.raw_input {
-  font-family: monospace;
-  font-size: inherit;
-  color: inherit;
-  width: auto;
-  /* make sure input baseline aligns with prompt */
-  vertical-align: baseline;
-  /* padding + margin = 0.5em between prompt and cursor */
-  padding: 0em 0.25em;
-  margin: 0em 0.25em;
-}
-input.raw_input:focus {
-  box-shadow: none;
-}
-p.p-space {
-  margin-bottom: 10px;
-}
-div.output_unrecognized {
-  padding: 5px;
-  font-weight: bold;
-  color: red;
-}
-div.output_unrecognized a {
-  color: inherit;
-  text-decoration: none;
-}
-div.output_unrecognized a:hover {
-  color: inherit;
-  text-decoration: none;
-}
-.rendered_html {
-  color: #000;
-  /* any extras will just be numbers: */
-}
-
-
-
-.rendered_html :link {
-  text-decoration: underline;
-}
-.rendered_html :visited {
-  text-decoration: underline;
-}
-
-
-
-
-
-
-.rendered_html h1:first-child {
-  margin-top: 0.538em;
-}
-.rendered_html h2:first-child {
-  margin-top: 0.636em;
-}
-.rendered_html h3:first-child {
-  margin-top: 0.777em;
-}
-.rendered_html h4:first-child {
-  margin-top: 1em;
-}
-.rendered_html h5:first-child {
-  margin-top: 1em;
-}
-.rendered_html h6:first-child {
-  margin-top: 1em;
-}
-
-
-
-
-
-
-
-
-.rendered_html * + ul {
-  margin-top: 1em;
-}
-.rendered_html * + ol {
-  margin-top: 1em;
-}
-
-
-.rendered_html pre,
-
-
-
-.rendered_html tr,
-.rendered_html th,
-
-.rendered_html td,
-
-
-.rendered_html * + table {
-  margin-top: 1em;
-}
-
-.rendered_html * + p {
-  margin-top: 1em;
-}
-
-.rendered_html * + img {
-  margin-top: 1em;
-}
-.rendered_html img,
-
-.rendered_html img.unconfined,
-
-div.text_cell {
-  /* Old browsers */
-  display: -webkit-box;
-  -webkit-box-orient: horizontal;
-  -webkit-box-align: stretch;
-  display: -moz-box;
-  -moz-box-orient: horizontal;
-  -moz-box-align: stretch;
-  display: box;
-  box-orient: horizontal;
-  box-align: stretch;
-  /* Modern browsers */
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-}
-@media (max-width: 540px) {
-  div.text_cell > div.prompt {
-    display: none;
-  }
-}
-div.text_cell_render {
-  /*font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;*/
-  outline: none;
-  resize: none;
-  width: inherit;
-  border-style: none;
-  padding: 0.5em 0.5em 0.5em 0.4em;
-  color: #000;
-  box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-}
-a.anchor-link:link {
-  text-decoration: none;
-  padding: 0px 20px;
-  visibility: hidden;
-}
-h1:hover .anchor-link,
-h2:hover .anchor-link,
-h3:hover .anchor-link,
-h4:hover .anchor-link,
-h5:hover .anchor-link,
-h6:hover .anchor-link {
-  visibility: visible;
-}
-.text_cell.rendered .input_area {
-  display: none;
-}
-.text_cell.rendered 
-.text_cell.unrendered .text_cell_render {
-  display: none;
-}
-.cm-header-1,
-.cm-header-2,
-.cm-header-3,
-.cm-header-4,
-.cm-header-5,
-.cm-header-6 {
-  font-weight: bold;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-.cm-header-1 {
-  font-size: 185.7%;
-}
-.cm-header-2 {
-  font-size: 157.1%;
-}
-.cm-header-3 {
-  font-size: 128.6%;
-}
-.cm-header-4 {
-  font-size: 110%;
-}
-.cm-header-5 {
-  font-size: 100%;
-  font-style: italic;
-}
-.cm-header-6 {
-  font-size: 100%;
-  font-style: italic;
-}
-</style>
-<style type="text/css">.highlight .hll { background-color: #ffffcc }
-.highlight  { background: #f8f8f8; }
-.highlight .c { color: #408080; font-style: italic } /* Comment */
-.highlight .err { border: 1px solid #FF0000 } /* Error */
-.highlight .k { color: #008000; font-weight: bold } /* Keyword */
-.highlight .o { color: #666666 } /* Operator */
-.highlight .ch { color: #408080; font-style: italic } /* Comment.Hashbang */
-.highlight .cm { color: #408080; font-style: italic } /* Comment.Multiline */
-.highlight .cp { color: #BC7A00 } /* Comment.Preproc */
-.highlight .cpf { color: #408080; font-style: italic } /* Comment.PreprocFile */
-.highlight .c1 { color: #408080; font-style: italic } /* Comment.Single */
-.highlight .cs { color: #408080; font-style: italic } /* Comment.Special */
-.highlight .gd { color: #A00000 } /* Generic.Deleted */
-.highlight .ge { font-style: italic } /* Generic.Emph */
-.highlight .gr { color: #FF0000 } /* Generic.Error */
-.highlight .gh { color: #000080; font-weight: bold } /* Generic.Heading */
-.highlight .gi { color: #00A000 } /* Generic.Inserted */
-.highlight .go { color: #888888 } /* Generic.Output */
-.highlight .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
-.highlight .gs { font-weight: bold } /* Generic.Strong */
-.highlight .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
-.highlight .gt { color: #0044DD } /* Generic.Traceback */
-.highlight .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
-.highlight .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
-.highlight .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
-.highlight .kp { color: #008000 } /* Keyword.Pseudo */
-.highlight .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
-.highlight .kt { color: #B00040 } /* Keyword.Type */
-.highlight .m { color: #666666 } /* Literal.Number */
-.highlight .s { color: #BA2121 } /* Literal.String */
-.highlight .na { color: #7D9029 } /* Name.Attribute */
-.highlight .nb { color: #008000 } /* Name.Builtin */
-.highlight .nc { color: #0000FF; font-weight: bold } /* Name.Class */
-.highlight .no { color: #880000 } /* Name.Constant */
-.highlight .nd { color: #AA22FF } /* Name.Decorator */
-.highlight .ni { color: #999999; font-weight: bold } /* Name.Entity */
-.highlight .ne { color: #D2413A; font-weight: bold } /* Name.Exception */
-.highlight .nf { color: #0000FF } /* Name.Function */
-.highlight .nl { color: #A0A000 } /* Name.Label */
-.highlight .nn { color: #0000FF; font-weight: bold } /* Name.Namespace */
-.highlight .nt { color: #008000; font-weight: bold } /* Name.Tag */
-.highlight .nv { color: #19177C } /* Name.Variable */
-.highlight .ow { color: #AA22FF; font-weight: bold } /* Operator.Word */
-.highlight .w { color: #bbbbbb } /* Text.Whitespace */
-.highlight .mb { color: #666666 } /* Literal.Number.Bin */
-.highlight .mf { color: #666666 } /* Literal.Number.Float */
-.highlight .mh { color: #666666 } /* Literal.Number.Hex */
-.highlight .mi { color: #666666 } /* Literal.Number.Integer */
-.highlight .mo { color: #666666 } /* Literal.Number.Oct */
-.highlight .sa { color: #BA2121 } /* Literal.String.Affix */
-.highlight .sb { color: #BA2121 } /* Literal.String.Backtick */
-.highlight .sc { color: #BA2121 } /* Literal.String.Char */
-.highlight .dl { color: #BA2121 } /* Literal.String.Delimiter */
-.highlight .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
-.highlight .s2 { color: #BA2121 } /* Literal.String.Double */
-.highlight .se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
-.highlight .sh { color: #BA2121 } /* Literal.String.Heredoc */
-.highlight .si { color: #BB6688; font-weight: bold } /* Literal.String.Interpol */
-.highlight .sx { color: #008000 } /* Literal.String.Other */
-.highlight .sr { color: #BB6688 } /* Literal.String.Regex */
-.highlight .s1 { color: #BA2121 } /* Literal.String.Single */
-.highlight .ss { color: #19177C } /* Literal.String.Symbol */
-.highlight .bp { color: #008000 } /* Name.Builtin.Pseudo */
-.highlight .fm { color: #0000FF } /* Name.Function.Magic */
-.highlight .vc { color: #19177C } /* Name.Variable.Class */
-.highlight .vg { color: #19177C } /* Name.Variable.Global */
-.highlight .vi { color: #19177C } /* Name.Variable.Instance */
-.highlight .vm { color: #19177C } /* Name.Variable.Magic */
-.highlight .il { color: #666666 } /* Literal.Number.Integer.Long */</style>
-<style type="text/css">
-/* Temporary definitions which will become obsolete with Notebook release 5.0 */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-bold { font-weight: bold; }
-</style>
+<div role="main" class="content clearfix">
+	<article>
+		<div class="post wrapper">
+			<h1>高性能python-选择合适的数据结构</h1>
+			<p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>这里是对 «Python高性能分析» 的文章解析。<br />
+<p>这里是对 &laquo;Python高性能分析&raquo; 的文章解析。<br/>
 将会引用来自书中的代码, 添加一些个人的理解备注, 作为学习笔记使用。</p>
 <blockquote><p><a href="https://github.com/mynameisfiber/high_performance_python">引用代码</a></p>
 </blockquote>
@@ -1084,19 +89,89 @@ h6:hover .anchor-link {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="计算Julia集合">计算Julia集合<a class="anchor-link" href="#计算Julia集合">¶</a></h2>
+<p>这个章节综合了第三章 &laquo;列表与元组&raquo; 和第四章 &laquo;字典与集合&raquo; 两个章节，说明在性能优化方面选择合适的数据结构有多么重要，以及他们之所以拖慢代码运行效率的原因。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="数组">数组<a class="anchor-link" href="#数组">&para;</a></h2><p>首先我们都了解，一个数组是数据在某种内在次序下的扁平列表。如果知道数据在数组中的位置，那我们就可以以 O(1) 的复杂度得到它。<br/>
+这里边，需要值得注意的是，数组可以有多种实现方式，其内存结构的不同，也决定了它们在查找数据时的效率不同。</p>
+<blockquote><p>注意：在下文中提到的数组都指 list</p>
+</blockquote>
+<p>在python中，列表是动态的数组，而元组则是静态的数组。这就有点像c++中的 vector。<br/>
+它是一块连续内存, 存放的是一个整形大小的指向实际数据的指针。<br/>
+区别在于动态的数组会比实际分配的空间占据更多的内存（这一部分内存用于记录它们自身状态的信息以便进行高效的resize）。</p>
+<p>当我们知道数据在数组中的下标之后我们就可以通过 <code>数组的指针（即数组第一个元素的指针）+ 下标 * 指针大小</code> 从而以 O(1) 的复杂度定位到数据所在。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="数组的搜索">数组的搜索<a class="anchor-link" href="#数组的搜索">&para;</a></h3><p>在实际使用中，搜索某个元素在数组中的位置是最常见的问题。在不知道元素在数组中的位置的情况下，我们需要对数组进行遍历。这个算法的复杂度为 O(n) (即最差情况下，我们要对长度为n的数据遍历n次)。</p>
+<blockquote><p>唯一提升速度的方法是了解数据如何存放在内存中，或者说了解存放我们数据的桶的组织方式。</p>
+</blockquote>
+<p>比如散列表，这可以通过另一种数据的组织方式实现 O(1) 的复杂度，下文讲述。<br/>
+再比如说，对数据进行排序之后再搜索。</p>
+<blockquote><p>高效搜索必需的两大要素是排序算法和搜索算法。</p>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="数据的排序">数据的排序<a class="anchor-link" href="#数据的排序">&para;</a></h3><p>如果我们先对我们的数据进行排序，使得所有位于某个元素左边的其他元素都小于（或大于）它，那么就可以获得更好的搜索性能。<br/>
+在python中，我们可以通过定义对象的 <code>__eq__</code> 和 <code>__lt__</code> 方法来实现对象的比较，如果没有实现，则对象之间就只能在同类型，并且比较其内存地址。</p>
+<p>值得一提的是，python列表使用了一个内建的排序算法使用了Tim排序。<br/>
+Tim排序可以在最佳情况下以 O(n)（最差情况下则是 O(n log n)）的复杂度排序。
+它运用了多种排序算法。对于给定的数据，它使用探索法猜测哪个算法的性能最优（更确切地说，它混用了插入排序和合并排序算法）来达到这样的性能。</p>
+<p>在我们后续的排序算法中，我们也可以通过这种策略，针对数据的不同混合多种排序，最常见的条件就是根据数据的长度。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="更有效的搜索">更有效的搜索<a class="anchor-link" href="#更有效的搜索">&para;</a></h3><p>在对数据排序之后。我们就可以使用二分搜索找到目标值。这个算法的复杂度是 O(log n) 。 它首先查询位于列表中点的值并和目标值比较。如果中点值小于目标值，我们就继续考察右半边列表，我们不断将列表二分，直至找到目标值或发现该值不存在于列表。结果就是我们不需要像线性搜索那样读取列表中所有的元素，而仅仅读取了一个子集。</p>
+<blockquote><p>为什么不使用字典以获取更高的效率。这时因为尽管字典的查询复杂度为 O(1), 但是在数组转为字典的过程中，其复杂度为 o(n), 所以在一个长度较长的数组中，这样的转换反而不如正常的二分搜索。当然如果字典的结果会被多次使用的话，那又值得商榷。</p>
+</blockquote>
+<p>这里值得一提的是，在python中，我们可以在数据插入的过程中简化 <code>排序-搜索</code> 这一流程。 利用<code>bisect</code>模块可以在保持排序的同时往列表中添加元素，通过通过一个高度优化过的二分搜索算法函数来查找元素。</p>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In [2]:</div>
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">time</span> 
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">bisect</span>
+<span class="kn">import</span> <span class="nn">random</span>
 
-<span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.8</span><span class="p">,</span> <span class="mf">1.8</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.8</span><span class="p">,</span> <span class="mf">1.8</span> 
-<span class="n">c_real</span><span class="p">,</span> <span class="n">c_imag</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.62772</span><span class="p">,</span> <span class="o">-.</span><span class="mi">42193</span>
+<span class="k">def</span> <span class="nf">find_closest</span><span class="p">(</span><span class="n">haystack</span><span class="p">,</span> <span class="n">needle</span><span class="p">):</span>
+    <span class="sd">''' 找到离needle最近的一个元素下标 '''</span>
+    <span class="c1"># bisect.bisect_left 将会返回 比 needle 小的第一个元素的下标</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect_left</span><span class="p">(</span><span class="n">haystack</span><span class="p">,</span> <span class="n">needle</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">haystack</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">haystack</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">needle</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">i</span>
+    <span class="k">elif</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">haystack</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">needle</span> <span class="o">&gt;</span> <span class="n">needle</span> <span class="o">-</span> <span class="n">haystack</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">j</span>
+    <span class="k">return</span> <span class="n">i</span>
+
+<span class="n">important_numbers</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">new_number</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+    <span class="n">bisect</span><span class="o">.</span><span class="n">insort</span><span class="p">(</span><span class="n">important_numbers</span><span class="p">,</span> <span class="n">new_number</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1104,76 +179,11 @@ h6:hover .anchor-link {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In [3]:</div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">calculate_z_serial_purepython</span><span class="p">(</span><span class="n">maxiter</span><span class="p">,</span> <span class="n">zs</span><span class="p">,</span> <span class="n">cs</span><span class="p">):</span>
-    <span class="sd">"""Calculate output list using Julia update rule"""</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">zs</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">zs</span><span class="p">)):</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="n">zs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">c</span> <span class="o">=</span> <span class="n">cs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">maxiter</span><span class="p">:</span>
-            <span class="n">z</span> <span class="o">=</span> <span class="n">z</span> <span class="o">*</span> <span class="n">z</span> <span class="o">+</span> <span class="n">c</span>
-            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span>
-    <span class="k">return</span> <span class="n">output</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [24]:</div>
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">calc_pure_python</span><span class="p">(</span><span class="n">desired_width</span><span class="p">,</span> <span class="n">max_iterations</span><span class="p">):</span>
-    <span class="sd">''' 获取两个常数数组， x从x1 到 x2 均匀递增， y从y2 到 y1 均匀递减'''</span>
-    <span class="n">x_step</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x2</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">desired_width</span><span class="p">))</span>
-    <span class="n">y_step</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">y2</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">desired_width</span><span class="p">))</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">ycoord</span> <span class="o">=</span> <span class="n">y2</span>
-    <span class="k">while</span> <span class="n">ycoord</span> <span class="o">&gt;</span> <span class="n">y1</span><span class="p">:</span>
-        <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ycoord</span><span class="p">)</span>
-        <span class="n">ycoord</span> <span class="o">+=</span> <span class="n">y_step</span>
-    <span class="n">xcoord</span> <span class="o">=</span> <span class="n">x1</span>
-    <span class="k">while</span> <span class="n">xcoord</span> <span class="o">&lt;</span> <span class="n">x2</span><span class="p">:</span>
-        <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xcoord</span><span class="p">)</span>
-        <span class="n">xcoord</span> <span class="o">+=</span> <span class="n">x_step</span>
-    <span class="sd">''' 为图像中的每个格子构建一个复数值 '''</span>
-    <span class="n">zs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">cs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">ycoord</span> <span class="ow">in</span> <span class="n">y</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">xcoord</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
-            <span class="n">zs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">complex</span><span class="p">(</span><span class="n">xcoord</span><span class="p">,</span> <span class="n">ycoord</span><span class="p">))</span>
-            <span class="n">cs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">complex</span><span class="p">(</span><span class="n">c_real</span><span class="p">,</span> <span class="n">c_imag</span><span class="p">))</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Length of x:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Total elements:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">zs</span><span class="p">))</span>
-    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="n">calculate_z_serial_purepython</span><span class="p">(</span><span class="n">max_iterations</span><span class="p">,</span> <span class="n">zs</span><span class="p">,</span> <span class="n">cs</span><span class="p">)</span>
-    <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">secs</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">calculate_z_serial_purepython</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">" took"</span><span class="p">,</span> <span class="n">secs</span><span class="p">,</span> <span class="s2">"seconds"</span><span class="p">)</span>
-
-    <span class="c1"># This sum is expected for a 1000^2 grid with 300 iterations.</span>
-    <span class="c1"># It catches minor errors we might introduce when we're</span>
-    <span class="c1"># working on a fixed set of inputs.</span>
-    <span class="k">assert</span> <span class="nb">sum</span><span class="p">(</span><span class="n">output</span><span class="p">)</span> <span class="o">==</span> <span class="mi">33219980</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [25]:</div>
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">calc_pure_python</span><span class="p">(</span><span class="n">desired_width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">max_iterations</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># 将是一个排序之后的数组</span>
+<span class="n">important_numbers</span>
 </pre></div>
 </div>
 </div>
@@ -1181,60 +191,33 @@ h6:hover .anchor-link {
 <div class="output_wrapper">
 <div class="output">
 <div class="output_area">
-<div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Length of x: 1000
-Total elements: 1000000
-calculate_z_serial_purepython took 8.289915800094604 seconds
-</pre>
+<div class="prompt output_prompt">Out[2]:</div>
+<div class="output_text output_subarea output_execute_result">
+<pre>[95, 329, 353, 499, 576, 607, 637, 772, 955, 990]</pre>
 </div>
 </div>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>在以上这段代码中，可以看出函数的执行时间在 8s 左右。这里边有值得一提的是 我们可以通过装饰器构造一个方法来计算方法的执行时间。<br />
-就像下面这样。</p>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In [26]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">wraps</span>
-
-<span class="k">def</span> <span class="nf">timefn</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
-    <span class="nd">@wraps</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">measure_time</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-        <span class="nb">print</span> <span class="p">(</span><span class="s2">"@timefn:"</span> <span class="o">+</span> <span class="n">fn</span><span class="o">.</span><span class="n">func_name</span> <span class="o">+</span> <span class="s2">" took "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" seconds"</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span>
-    <span class="k">return</span> <span class="n">measure_time</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">closest_index</span> <span class="o">=</span> <span class="n">find_closest</span><span class="p">(</span><span class="n">important_numbers</span><span class="p">,</span> <span class="mi">1100</span><span class="p">)</span>
+<span class="s2">"Closest value to 1100: </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">important_numbers</span><span class="p">[</span><span class="n">closest_index</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
 </div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt output_prompt">Out[3]:</div>
+<div class="output_text output_subarea output_execute_result">
+<pre>'Closest value to 1100: 990'</pre>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>但不可避免的是，这样的方法总是要在源代码上添加一些代码，我们可以通过以下方法来获取一个函数的执行时间。</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="计算代码执行时长">计算代码执行时长<a class="anchor-link" href="#计算代码执行时长">¶</a></h2>
 </div>
 </div>
 </div>
@@ -1242,12 +225,22 @@ calculate_z_serial_purepython took 8.289915800094604 seconds
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>我们可以通过几种办法获取一个函数的具体执行时长。</p>
+<h3 id="数组的内存分配">数组的内存分配<a class="anchor-link" href="#数组的内存分配">&para;</a></h3><p>动态数组支持resize操作，可以增加数组的容量。为了避免在每次添加元素的时候进行内存复制（当数据在达到容量时，会创建一个新的更大容量的列表，并将旧列表的数据复制到新列表中，旧列表销毁），在达到容量上限再次添加时，会按一定公式实际分配更多的内存空间，通过预留空间的做法，我们就可以减少这一分配空间的操作的次数以及内存复制的次数。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="元祖_1">元祖<a class="anchor-link" href="#元祖">&para;</a></h2><p>既然元祖和数组都是一段连续的内存结构，那么它们之间有什么不同。</p>
+<p>其实在上文已经提到：</p>
 <ul>
-<li>python代码使用 timeit 模块<div class="highlight"><pre><span></span>python -m timeit -n <span class="m">5</span> -r <span class="m">5</span> -s <span class="s2">"&lt;some code&gt;"</span>
-</pre></div>
-这将会通过-n 执行循环次数, -r 指定重复次数，通过重复执行获取最好的结果</li>
+<li>列表是动态数组，它们可变且可以重设长度（改变其内部元素的个数）</li>
+<li>元组是静态数组，它们不可变，且其内部数据一旦创建便无法改变。</li>
 </ul>
+<p>这里额外提一点，元组缓存于Python运行时环境，这意味着我们每次使用元组时无须访问内核去分配内存，这就是为什么元祖要比数组效率更好的原因。<br/>
+同样的，尽管数组和元祖都支持存放不同的数据类型，但是这会带来额外的开销并减少一些可能的优化。</p>
 </div>
 </div>
 </div>
@@ -1255,52 +248,109 @@ calculate_z_serial_purepython took 8.289915800094604 seconds
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="元祖的内存分配">元祖的内存分配<a class="anchor-link" href="#元祖的内存分配">&para;</a></h3><p>元祖不支持改变大小，所以一个元祖不会保留额外空间，和同样长度的列表相比，元祖占据更少的内存。<br/>
+同样的。元祖支持合并操作，但是和数组的append不同，这个操作会遍历元祖进行复制操作，任意两个元组相加始终返回一个新分配的元组。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="元祖的效率">元祖的效率<a class="anchor-link" href="#元祖的效率">&para;</a></h3><p>另外一个元祖比数组效率更高的地方在于，对于长度为1-20的元祖而言，即使它们已经被销毁，但是其内存也不会立即返回给操作系统，而是留待未来使用。<br/>
+这意味着当未来需要一个同样大小的新元组时，我们不再需要向操作系统申请一块内存来存放数据，因为我们已经有了预留的内存。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="字典_1">字典<a class="anchor-link" href="#字典">&para;</a></h2><p>如果你有一些无序数据但它们可以被唯一的索引对象来引用（任何可以被散列的类型都可以成为索引对象，索引对象通常会是一个字符串），那么字典就是理想的数据结构。</p>
+<p>但是，由于字典的特殊结构，它们通常会占用更多的内存；并且，虽然插入/查询操作的复杂度为 O(1), 但实际的速度极大取决于其使用的散列函数。如果散列函数的运行速度较慢，那么在字典上进行的任何操作也会相应变慢。在下文我们将看到这一点。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="字典的散列实现">字典的散列实现<a class="anchor-link" href="#字典的散列实现">&para;</a></h3><p>我们都知道，字典是按一定散列方式，将一个任意的键（一个可hash对象）转变为一个列表的索引，这样我们就可以通过计算出键的hash值来找到我们的元素，实现 O(1) 的复杂度。</p>
+<blockquote><p>对于对象，我们可以通过自己实现 <code>__hash__</code> 函数，使得对象成为一个可hash对象(hashable)</p>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="字典的插入">字典的插入<a class="anchor-link" href="#字典的插入">&para;</a></h3><p>对于散列表的插入，我们必须首先弄清楚以下两点：</p>
 <ul>
-<li>unix 下使用 time 命令<div class="highlight"><pre><span></span>/usr/bin/time -p python <span class="s2">"&lt;file&gt;"</span>
-</pre></div>
-这将会返回三个值， real 记录整体耗时， user 记录cpu在任务执行上消耗的时长， sys 记录cpu在调度过程内核函数消耗的时长</li>
+<li>数据在这个连续内存块中的位置</li>
+<li>该值如何与其他对象进行比较</li>
 </ul>
-<blockquote><p>这里可以通过添加参数 --verbose 获取更加详细的结果。<br />
-其中 <code>Major (requiring I/O) page faults</code> 指标表示 任务在磁盘IO上消耗的时长，这个值会造成 <code>user + sys = real</code> 的较大偏差</p>
+<blockquote><p>当我们插入数据时，首先需要计算键的散列值并掩码来得到一个有效的数组索引。掩码是为了保证一个可能是任意数字的散列值最终能落入分配的空间。</p>
 </blockquote>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<ul>
-<li>ipython 下使用 %timeit 魔法命令<blockquote><p>这个命令和 python 的 timeit 模块效果是一致的，区别是需要在 ipython 环境下执行</p>
-</blockquote>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="使用cProfile模块">使用cProfile模块<a class="anchor-link" href="#使用cProfile模块">¶</a></h2>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>我们可以通过以下命令来调用cProfile模块获得代码中的每个函数的调用统计。<br />
-这其中包括 Ncalls 调用次数， cumtime 函数耗时时长， tottime 函数内部没有调用函数的其他代码的耗时时长。</p>
-<div class="highlight"><pre><span></span>python -m cProfile -s cumulative -o profile.stats julia_nopil.py
+<p>其实这里书中说的有点复杂，简单的说就是，在长度为N的空间中，保证散列值能够落在小于N的空间。可以通过 <code>散列值 &amp; bin(N-1)</code> 来计算最终落入的下标，这个实际上和 <code>模取N取余数</code> 时一个道理的。</p>
+<p>如果两个值相等，说明该键值对已经存在在该字典中，无所再次插入。如果不等。则可以通过一个简单的线性函数计算出一个新的索引（这一方法称之为<code>嗅探</code>)。</p>
+<p>这里展示了一个python2.7 中使用的基本的嗅探的伪代码。</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">index_sequence</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="mb">0b111</span><span class="p">,</span> <span class="n">PERTURB_SHIFT</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">perturb</span> <span class="o">=</span> <span class="nb">hash</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> 
+    <span class="n">i</span> <span class="o">=</span> <span class="n">perturb</span> <span class="o">&amp;</span> <span class="n">mask</span>
+    <span class="k">yield</span> <span class="n">i</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="p">((</span><span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="n">perturb</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">perturb</span> <span class="o">&gt;&gt;=</span> <span class="n">PERTURB_SHIFT</span>
+        <span class="k">yield</span> <span class="n">i</span> <span class="o">&amp;</span> <span class="n">mask</span>
 </pre></div>
-<blockquote><p>-s cumulative 对函数时间进行排序<br />
--o 输出文件， 可以通过以下命令读取统计文件</p>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pstats</span>
-<span class="n">p</span> <span class="o">=</span> <span class="n">pstats</span><span class="o">.</span><span class="n">Stats</span><span class="p">(</span><span class="s2">"profile.stats"</span><span class="p">)</span>
-<span class="n">p</span><span class="o">.</span><span class="n">sort_stats</span><span class="p">(</span><span class="s2">"cumulative"</span><span class="p">)</span>
-<span class="n">p</span><span class="o">.</span><span class="n">print_stats</span><span class="p">()</span>
+<blockquote><p>重要的是记住线性嗅探仅使用了散列值的最后几个字节而没有考虑其余字节（比如，对于一个8元素字典，我们只查看了最后3个比特，因为当前的掩码是0x111）。这意味着如果两个键的散列值最后3个比特相等，那么不仅产生了一个碰撞，同时其后的嗅探索引序列也都是一样的。Python使用的扰动方案会考虑散列值中更多的比特位来解决这一问题。</p>
+</blockquote>
+<p>以上是一段书中的原文，我的理解是，对于一个长度为8的字典（或小于8），我们只需比较 bin(8-1) = 0x111 即最后3位的掩码，就可以计算出实际元素落在字典空间的位置。反过来说，如果两个键之间的散列值的最后3位相等，那么在第二次查找中将会产生一个<code>散列碰撞</code>，由于其之后的嗅探序列（按一定规则进行计算新索引）也是一样的，所以可以通过计算一个新的复合嗅探序列的新索引，存放第二个元素。</p>
+<p>以下是一段执行代码</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">City</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">ord</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># We create a dictionary where we assign arbitrary values to cities</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">City</span><span class="p">(</span><span class="s2">"Rome"</span><span class="p">):</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">City</span><span class="p">(</span><span class="s2">"San Francisco"</span><span class="p">):</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">City</span><span class="p">(</span><span class="s2">"New York"</span><span class="p">):</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">City</span><span class="p">(</span><span class="s2">"Barcelona"</span><span class="p">):</span> <span class="mi">2</span><span class="p">,</span>
+<span class="p">}</span>
 </pre></div>
+<p>该hash返回字符串的首字符的ascii码，对于一个长度为4的字典, 则其掩码为 bin(8-1) = 0b111。</p>
+<blockquote><p>对于一个长度为4的字典，其实际占据空间为8，这时因为字典和数组一样预留一定的空间。对于一个字典的性能的较优解来说，实际数据的容量应占据实际空间的<code>3/5</code>左右，并使用大于实际空间最接近的一个容量大小 8, 32, 158, 512, 2048 等。当然你也可以理解为字典的最小空间为8 :)</p>
+</blockquote>
+<p>对于 Rome 其在字典空间中的下标为 2 <code>ord('R') &amp; 0b111 = 82 &amp; 0b111</code>;<br/>
+San Francisco 其在字典空间的下标为 3 <code>ord('S') &amp; 0b111 = 83 &amp; 0b111</code>;<br/>
+New York 其在字典空间的下标为 6 <code>ord('N') &amp; 0b111 = 78 &amp; 0b111</code>;<br/>
+但对于 Barcelona 来说。其下标 2 <code>ord('B') &amp; 0b111 = 66 &amp; 0b111</code> 与 Rome 的下标相同，所以 Barcelona 的插入需要经过再次计算。<br/>
+通过上文的嗅探代码计算新的下标 5 <code>((i &lt;&lt; 2) + i + perturb + 1) &amp; 0b111 = ((2 &lt;&lt; 2) + 2 + 66 + 1) &amp; 0b111 = 77 &amp; 0b111</code>。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="字典的大小">字典的大小<a class="anchor-link" href="#字典的大小">&para;</a></h3><p>和数组类似，字典在达到一定大小之后，将会增长。为了做到这一点，需要分配一个更大的表（也就是在内存中预留更多的桶），将掩码调整为适合新的表，旧表中的所有元素被重新插入新表。这需要重新计算索引，因为改变后的掩码会改变索引计算结果。结果就是，改大散列表的代价非常之大。</p>
+<blockquote><p>研究显示一个不超过三分之二满的表在具有最佳空间节约的同时依然具有不错的散列碰撞避免率。</p>
+</blockquote>
+<p>字典或集合默认的最小长度是8（也就是说，即使你只保存3个值，Python仍然会分配8个元素）。每次改变大小时，容器的长度增加到原来的4倍，直至达到50000个元素，之后每次增加到原来的2倍。这导致了下面可能的大小：</p>
+<p><code>8, 32, 128, 512, 2048, 8192, 32768, 131072, 262144, ...</code></p>
+<p>值得注意的是当一个散列表变大或变小时都可能发生改变大小。也就是说，如果散列表中足够多的元素被删除，表可能会被改小。但是，改变大小仅发生在插入时。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="字典的获取与删除">字典的获取与删除<a class="anchor-link" href="#字典的获取与删除">&para;</a></h3><p>通过计算出字典的下标之后，需要比较两个值之间是否相等，如果相等则计算下一个嗅探序列的下标，获取其值，直到其值为 NULL 作为终止嗅探序列的标志。我们就可以认为字典中不存在该数据。<br/>
+同样的，当一个值从散列表中被删除时，我们需要一个特殊的值来表示该空间虽空，但其后可能还有别的因散列碰撞而插入的值。</p>
+<blockquote><p>这里我的理解是，实际在字典中，用 NULL 表示一个嗅探序列的中止，表示从这之后的嗅探序列都没有值。而当一个值从散列表中删除，其实应该是类似 <code>dict[key] = None</code> 这样的效果，此时，该键仍存在但其值为空，嗅探序列仍能够往下执行，直至遇到 NULL 为止 。如果是 <code>del dict[key]</code> 的话，则应该该段空间都被置为 NULL。</p>
 </blockquote>
 </div>
 </div>
@@ -1309,16 +359,73 @@ calculate_z_serial_purepython took 8.289915800094604 seconds
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="使用可视化工具对cProfile的输出进行可视化">使用可视化工具对cProfile的输出进行可视化<a class="anchor-link" href="#使用可视化工具对cProfile的输出进行可视化">¶</a></h2><p>有时候查看cProfile的文件还是太过麻烦，这时就可以通过相应的可视化工具进行输出，这样更加直观方便。</p>
+<h3 id="散列函数">散列函数<a class="anchor-link" href="#散列函数">&para;</a></h3><p>从上文中可以知道，选择一个合适的散列函数有多么重要，这关系到删除与查询的性能。<br/>
+散列函数需要让散列值均匀分布以避免散列碰撞。碰撞太频繁会降低散列表的性能：如果大多数键都有碰撞，那么我们需要经常&ldquo;嗅探&rdquo;其他索引值，有可能需要在字典中访问很大一片区域来寻找需要的键。最坏情况下，字典中所有的键都碰撞，字典查询的性能变成O(n)，就跟搜索一个列表一样。</p>
+<p>理论上来说，当所有的散列值都具有同样的被选中概率时熵最大。一个令熵最大的散列函数被称为完美散列函数，因为它保证了最低的碰撞次数。 
+对于无限大的字典来说，其常数每个值作为散列值都不相等，并且其被选中的概率也都一样。</p>
+<p>但对于有限长度字典来说，存在碰撞将不可避免。不过我们可以通过一些手段来优化。</p>
+<p>例如对于一个字典，我们已知会放入5000个元素，则我们可以通过预先分配 32768 的空间的字典，以避免字典的复制和索引重新计算。</p>
+<blockquote><p>这时因为为了找到大小为N的字典的掩码，我们首先找到能令该字典保持三分之二满的最低桶数（N <em> 5 / 3）。 即 5000 </em> 5 / 3 = 8333。 然后找到能满足这个数字的最小字典大小，并找到足以保存这一数字的bit的位数。即我们需要 32768 长度的空间，其掩码为 bin(32768 - 1) = 0b111111111111111</p>
+</blockquote>
+<p>所以。在构建自定义类的时候，散列函数对键的使用方式将极大地影响数据结构的最终性能。了解这一块内容的实现方便我们实现更好的 <code>__hash__</code> 函数。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="集合_1">集合<a class="anchor-link" href="#集合">&para;</a></h2><p>集合有一个重要的特性，就是其键的唯一性，你可以把它当作时一个特殊的字典，只不过它丢弃了所有的值。</p>
+<p>如果你尝试添加一个已有的项，该项不会被添加进集合。另外，这一操作的代价是O(1)。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="python中的命名空间">python中的命名空间<a class="anchor-link" href="#python中的命名空间">&para;</a></h2><p>当Python访问一个变量、函数或模块时，都有一个体系来决定它去哪里查找这些对象。首先，Python查找locals()数组，其内保存了所有本地变量的条目。Python花了很多精力优化本地变量查询的速度，而这也是整条链上唯一一个不需要字典查询的部分。如果它不在本地变量里，那么会搜索globals()字典。最后，如果对象也不在那里，则搜索<strong>builtin</strong>对象。</p>
+<p>以下代码展示了三种不同的方法:</p>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In [1]:</div>
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>python3 -m cProfile -s cumulative -o profile.stats julia_nopil.py
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">sin</span>
+
+<span class="k">def</span> <span class="nf">test1</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">test2</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">test3</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sin</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>通过dis模块的dis可以查看其字节码调用</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">dis</span>
+
+<span class="n">dis</span><span class="o">.</span><span class="n">dis</span><span class="p">(</span><span class="n">test1</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1328,9 +435,61 @@ calculate_z_serial_purepython took 8.289915800094604 seconds
 <div class="output_area">
 <div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Length of x: 1000
-Total elements: 1000000
-calculate_z_serial_purepython took 12.32185983657837 seconds
+<pre>  5           0 LOAD_GLOBAL              0 (math)
+              2 LOAD_ATTR                1 (sin)
+              4 LOAD_FAST                0 (x)
+              6 CALL_FUNCTION            1
+              8 RETURN_VALUE
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dis</span><span class="o">.</span><span class="n">dis</span><span class="p">(</span><span class="n">test2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>  8           0 LOAD_GLOBAL              0 (sin)
+              2 LOAD_FAST                0 (x)
+              4 CALL_FUNCTION            1
+              6 RETURN_VALUE
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dis</span><span class="o">.</span><span class="n">dis</span><span class="p">(</span><span class="n">test3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre> 11           0 LOAD_FAST                1 (sin)
+              2 LOAD_FAST                0 (x)
+              4 CALL_FUNCTION            1
+              6 RETURN_VALUE
 </pre>
 </div>
 </div>
@@ -1341,50 +500,19 @@ calculate_z_serial_purepython took 12.32185983657837 seconds
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="使用gprof2dot对文件进行可视化分析">使用gprof2dot对文件进行可视化分析<a class="anchor-link" href="#使用gprof2dot对文件进行可视化分析">¶</a></h3><p>使用前可以通过 <code>pip install gprof2dot</code> 来安装</p>
-<blockquote><p><a href="https://github.com/jrfonseca/gprof2dot">文档</a></p>
-</blockquote>
-<p>gprof2dot可以将将多种Profiler的数据转成Graphviz可处理的图像表述。<br />
-配合dot命令，即可得到不同函数所消耗的时间分析图。</p>
+<p>这里通过三种不同的代码方式，将sin函数保存在不同的命名空间内。<br/>
+在test1中先寻找math模块，再寻找sin函数经过了两次字典查询。
+在test2中预先导入了sin函数，所以只需在全局空间寻找一次。<br/>
+在test3中虽然也需要寻找一次sim函数，但是将其保存在本地变量之后，之后的寻找将会在本地变量中执行，这将会带来性能提升。当然，在普通函数调用中，这种写法并不常见，并且由于python3的优化，甚至于在普通调用 test2 和 test3的比较中， test2的效率要更高。 :)</p>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In [25]:</div>
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>gprof2dot -f pstats profile.stats <span class="p">|</span> dot -Tpng -o ../../../images/profile.png
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>得到下图. 从图中可以看出各个函数往下执行的调用占比。
-<img alt="profile.png" src="https://timkingnf.github.io/blog/images/profile.png" /></p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="使用-vprof-进行可视化分析">使用 vprof 进行可视化分析<a class="anchor-link" href="#使用-vprof-进行可视化分析">¶</a></h3><p>通过<code>pip install vprof</code>安装</p>
-<blockquote><p><a href="https://github.com/nvdv/vprof">文档</a></p>
-</blockquote>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [7]:</div>
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>vprof -c c julia_nopil.py # 这里将会执行启动一个web server，在浏览器上展示分析的结果
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">timeit</span> test2(10000000)
 </pre></div>
 </div>
 </div>
@@ -1394,44 +522,19 @@ calculate_z_serial_purepython took 12.32185983657837 seconds
 <div class="output_area">
 <div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Running FlameGraphProfiler...
-Length of x: 1000
-Total elements: 1000000
-calculate_z_serial_purepython took 8.433602094650269 seconds
-Starting HTTP server...
+<pre>205 ns &plusmn; 2.96 ns per loop (mean &plusmn; std. dev. of 7 runs, 1000000 loops each)
 </pre>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="RunSnakeRun">RunSnakeRun<a class="anchor-link" href="#RunSnakeRun">¶</a></h3><div class="highlight"><pre><span></span><span class="c1"># TODO(timking): 补充RunSnakeRun的分析方法</span>
-</pre></div>
-<p>这里还有一种方法可以使用，书中原文可以使用的这一种。但我暂时没有找到方法，暂时搁置。</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="使用LineProfiler进行逐行分析">使用LineProfiler进行逐行分析<a class="anchor-link" href="#使用LineProfiler进行逐行分析">¶</a></h2><p>在上文我们找到耗时占比较大的函数之后。就可以通过 line_profile 来进行逐行分析。<br />
-使用 <code>pip install line_profiler</code>安装模块之后。<br />
-我们需要修改代码文件。在需要分析的函数处添加装饰器 <code>@profile</code></p>
-<p>这里我们标记耗时较长的 calculate_z_serial_purepython 函数</p>
-</div>
-</div>
-</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In [10]:</div>
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>kernprof -l -v julia_lineprofiler.py
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">timeit</span> test3(10000000)
 </pre></div>
 </div>
 </div>
@@ -1441,205 +544,97 @@ Starting HTTP server...
 <div class="output_area">
 <div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Length of x: 1000
-Total elements: 1000000
-calculate_z_serial_purepython took 92.4572069644928 seconds
-Wrote profile results to julia_lineprofiler.py.lprof
-Timer unit: 1e-06 s
-
-Total time: 53.5594 s
-File: julia_lineprofiler.py
-Function: calculate_z_serial_purepython at line 7
-
-Line #      Hits         Time  Per Hit   % Time  Line Contents
-==============================================================
-     7                                           @profile
-     8                                           def calculate_z_serial_purepython(maxiter, zs, cs):
-     9                                               """Calculate output list using Julia update rule"""
-    10         1       4121.0   4121.0      0.0      output = [0] * len(zs)
-    11   1000001     427083.0      0.4      0.8      for i in range(len(zs)):
-    12   1000000     403721.0      0.4      0.8          n = 0
-    13   1000000     479455.0      0.5      0.9          z = zs[i]
-    14   1000000     446756.0      0.4      0.8          c = cs[i]
-    15  34219980   20103258.0      0.6     37.5          while abs(z) &lt; 2 and n &lt; maxiter:
-    16  33219980   16408962.0      0.5     30.6              z = z * z + c
-    17  33219980   14826327.0      0.4     27.7              n += 1
-    18   1000000     459676.0      0.5      0.9          output[i] = n
-    19         1          0.0      0.0      0.0      return output
-
+<pre>210 ns &plusmn; 2.57 ns per loop (mean &plusmn; std. dev. of 7 runs, 1000000 loops each)
 </pre>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>从上面的输出看出，主要消耗时间集中在 while 循环中。<br />
-while判断 甚至两行赋值语句，都因为循环了 34219980次 而导致占比时间均在 30%左右。</p>
-<blockquote><p>while 判断中是两个表达式，无从判断两个表达式何者占用的时间更慢<br />
-但是通过推导可知，函数会比单纯的逻辑表达式更慢。<br />
-在while表达式之后，我们可以通过调整 两个表达式的先后顺序，使得第一次判断的时间减少<br />
-理论上将优化一定的性能，而书中的结果也印证了这一点</p>
-<p>在对整体对函数<code>calc_pure_python</code>分析中，引用书上的结果，<br />
-<code>calculate_z_serial_purepython</code>占用了97%的时间，可见创建列表的耗时在此次无足轻重</p>
-</blockquote>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="分析内存用量">分析内存用量<a class="anchor-link" href="#分析内存用量">¶</a></h2><p>书上提到了使用memory_profiler 分析的方法，但是在实际生产环境中， memory_profiler会导致代码的执行效率急剧降低，这是不可忍受的。<br />
-好在我们可以通过Ipython的 <code>%memit</code> 来分析 某些语句的 RAM使用情况。</p>
-<p>这些内容将会在后续章节中说明。</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="分析堆上的对象使用内存">分析堆上的对象使用内存<a class="anchor-link" href="#分析堆上的对象使用内存">¶</a></h2><p>依照书上提供的 <code>guppy</code> 库好像无法在python3环境下工作。<br />
-只能退而求次使用另一个分析内存的工具 <code>objgraph</code></p>
-<blockquote><p><a href="https://mg.pov.lt/objgraph/">文档</a></p>
-</blockquote>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="单元测试">单元测试<a class="anchor-link" href="#单元测试">¶</a></h2>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [11]:</div>
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>cat ex.py
-</pre></div>
-</div>
-</div>
-</div>
-<div class="output_wrapper">
-<div class="output">
-<div class="output_area">
-<div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>import unittest
+</p>
 
+			<!-- <a href="https://twitter.com/share" class="twitter-share-button" data-via="" data-lang="en" data-size="large" data-related="">Tweet</a>
+			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script> -->
 
-@profile
-def some_fn(nbr):
-    return nbr * 2
+			<div class="page-nav">
+				<a class="btn left" href="https://timkingnf.github.io/blog/high_performance_python_section1.html">
+					← 高性能python-性能分析
+				</a>
+			</div>
 
+			<div class="comments">
+				<h2>Comments !</h2>
+			    <div id="disqus_thread"></div>
+			    <script type="text/javascript">
+			       var disqus_identifier = "high_performance_python_section2.html";
+			       (function() {
+			       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+			       dsq.src = 'https://https-timkingnf-github-io-blog.disqus.com/embed.js';
+			       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+			      })();
+				</script>
+			</div>
+		</div>
 
-class TestCase(unittest.TestCase):
-    def test(self):
-        result = some_fn(2)
-        self.assertEquals(result, 4)
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>对上述代码进行单元测试</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [20]:</div>
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>nosetests ex.py
-</pre></div>
-</div>
-</div>
-</div>
-<div class="output_wrapper">
-<div class="output">
-<div class="output_area">
-<div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>.
-----------------------------------------------------------------------
-Ran 1 test in 0.000s
+<div class="wrapper meta">
+	<ul class="nav">
+		<li><a href="https://timkingnf.github.io/blog/index.html">Home</a></li>
+		<li><a href="https://timkingnf.github.io/blog/archives.html">Archive</a></li>
+		<li><a href="https://timkingnf.github.io/blog/Tags.html">Tags</a></li>
+		<li><a href="https://timkingnf.github.io/blog/Categories.html">Categories</a></li>
 
-OK
-</pre>
-</div>
-</div>
-</div>
-</div>
+		<li><a href="https://github.com/TimKingNF">GitHub</a></li>
+	</ul>
+
+	<div class="search_warpper">
+		<h2>Search</h2>
+		<form action="https://timkingnf.github.io/blog/search.html">
+			<div class="tipue_search_group">
+			<input type="text" name="q" class="search_text" pattern=".{3,}" title="At least 3 characters" required>
+			</div>
+		</form>
+
+		<div id="tipue_search_content"></div>
+	</div>
 </div>
 
-<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
-    var mathjaxscript = document.createElement('script');
-    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
-    mathjaxscript.type = 'text/javascript';
-    mathjaxscript.src = '//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
-    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
-        "MathJax.Hub.Config({" +
-        "    config: ['MMLorHTML.js']," +
-        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
-        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
-        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
-        "    displayAlign: 'center'," +
-        "    displayIndent: '0em'," +
-        "    showMathMenu: true," +
-        "    tex2jax: { " +
-        "        inlineMath: [ ['$','$'] ], " +
-        "        displayMath: [ ['$$','$$'] ]," +
-        "        processEscapes: true," +
-        "        preview: 'TeX'," +
-        "    }, " +
-        "    'HTML-CSS': { " +
-        " linebreaks: { automatic: true, width: '95% container' }, " +
-        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'black ! important'} }" +
-        "    } " +
-        "}); ";
-    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
-}
-</script>
+<div class="meta wrapper">
+	<time datetime="2018-06-16T12:56:00+08:00" pubdate>
+		2018-06-16
+	</time>
 
 
-      </div><!-- /.entry-content -->
+	<ul class="tag clearfix">
+		<li><a href="https://timkingnf.github.io/blog/category/python.html">Python</a></li>
 
-    </article>
-  </section>
+	</ul>
+
+	<ul class="tag clearfix">
+				<li><a href="https://timkingnf.github.io/blog/tag/shu-ju-jie-gou.html">数据结构</a></li>
+	</ul>
+
+	<nav class="toc">
+		<div id="toc"><ul><li><a class="toc-href" href="#数组" title="数组&para;">数组&para;</a><ul><li><a class="toc-href" href="#数组的搜索" title="数组的搜索&para;">数组的搜索&para;</a></li><li><a class="toc-href" href="#数据的排序" title="数据的排序&para;">数据的排序&para;</a></li><li><a class="toc-href" href="#更有效的搜索" title="更有效的搜索&para;">更有效的搜索&para;</a></li><li><a class="toc-href" href="#数组的内存分配" title="数组的内存分配&para;">数组的内存分配&para;</a></li></ul></li><li><a class="toc-href" href="#元祖_1" title="元祖&para;">元祖&para;</a><ul><li><a class="toc-href" href="#元祖的内存分配" title="元祖的内存分配&para;">元祖的内存分配&para;</a></li><li><a class="toc-href" href="#元祖的效率" title="元祖的效率&para;">元祖的效率&para;</a></li></ul></li><li><a class="toc-href" href="#字典_1" title="字典&para;">字典&para;</a><ul><li><a class="toc-href" href="#字典的散列实现" title="字典的散列实现&para;">字典的散列实现&para;</a></li><li><a class="toc-href" href="#字典的插入" title="字典的插入&para;">字典的插入&para;</a></li><li><a class="toc-href" href="#字典的大小" title="字典的大小&para;">字典的大小&para;</a></li><li><a class="toc-href" href="#字典的获取与删除" title="字典的获取与删除&para;">字典的获取与删除&para;</a></li><li><a class="toc-href" href="#散列函数" title="散列函数&para;">散列函数&para;</a></li></ul></li><li><a class="toc-href" href="#集合_1" title="集合&para;">集合&para;</a></li><li><a class="toc-href" href="#python中的命名空间" title="python中的命名空间&para;">python中的命名空间&para;</a></li></ul></div>
+	</nav>
 </div>
-            </div>
-        </div>
-    </div>
 
-    <footer id="site-footer">
-        <div class="row-fluid">
-            <div class="span10 offset1">
-                <!-- <address>
-                    <p>
-                        This blog is proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
-                    </p>
-                    <p>
-                        <a href="http://github.com/jsliang/pelican-fresh/">Fresh</a> is a responsive theme designed by <a href="http://jsliang.com/">jsliang</a> and <a href="https://github.com/jsliang/pelican-fresh/graphs/contributors">contributors</a>.
-                        Special thanks to <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a> and <a href="http://getbootstrap.com/">Twitter Bootstrap</a>.
-                    </p>
-                </address> -->
-            </div>
-        </div>
-    </footer>
+	</article>
+</div>
+
+	<a href="#" class="scoll-top"></a>
+
+	<!-- <footer class="clearfix">
+
+		<a href="#" class="scoll-top"></a>
+
+	</footer> -->
+
+	<script>
+	  var _gaq=[['_setAccount','UA-120924939-1'],['_trackPageview']];
+	  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+	  g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+	  s.parentNode.insertBefore(g,s)}(document,'script'));
+	</script>
 
 </body>
 </html>
