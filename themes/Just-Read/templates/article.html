@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}{{ article.title }} - {{ SITENAME }}{% endblock %}
+
+{% block scripts %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script src="https://cdn.rawgit.com/leafo/sticky-kit/v1.1.2/jquery.sticky-kit.min.js"></script>
+<script src="{{ SITEURL }}/theme/js/require.js"></script>
+<script type="text/javascript">
+	requirejs.config({
+		baseUrl: "theme",
+		paths: {
+			"plotly-latest": 'js/plotly-latest.min',
+			"embed-amd": "js/embed-amd",
+		},
+	});
+	require(
+		['plotly-latest', "embed-amd"],
+		function(){
+			// 固定元素
+			$(".toc, .search_warpper").stick_in_parent({
+				parent: ".content"
+			});
+		}
+	)
+</script>
+{% endblock %}
+
+{% block content %}
+<div role="main" class="content clearfix">
+	<article>
+		<div class="post wrapper">
+			<h1>{{ article.title }}</h1>
+			{{ article.content }}
+
+			<!-- <a href="https://twitter.com/share" class="twitter-share-button" data-via="{{ TWITTER_USERNAME }}" data-lang="en" data-size="large" data-related="{{ TWITTER_USERNAME }}">Tweet</a>
+			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script> -->
+
+			<div class="page-nav">
+				{% if article.prev_article %}
+				<a class="btn left" href="{{ SITEURL }}/{{ article.prev_article.url}}">
+					← {{ article.prev_article.title }}
+				</a>
+				{% endif %}
+				{% if article.next_article %}
+				<a class="btn right" href="{{ SITEURL }}/{{ article.next_article.url}}">
+					{{ article.next_article.title }} ➡
+				</a>
+				{% endif %}
+			</div>
+
+			{% if DISQUS_SITENAME %}
+			<div class="comments">
+				<h2>Comments !</h2>
+			    <div id="disqus_thread"></div>
+			    <script type="text/javascript">
+			       var disqus_identifier = "{{ article.url }}";
+			       (function() {
+			       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+			       dsq.src = 'https://{{ DISQUS_SITENAME }}.disqus.com/embed.js';
+			       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+			      })();
+				</script>
+			</div>
+			{% endif %}
+		</div>
+
+		{% include 'metadata.html' %}
+
+	</article>
+</div>
+{% endblock %}

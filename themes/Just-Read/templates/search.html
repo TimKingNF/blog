@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ SITENAME }} Search {% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="{{ SITEURL }}/theme/tipuesearch/tipuesearch.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="{{ SITEURL }}/theme/js/require.js"></script>
+<script>
+    requirejs.config({
+        baseUrl: "theme",
+        paths: {
+            "tipuesearch_set": 'tipuesearch/tipuesearch_set',
+            "tipuesearch_content": 'js/tipuesearch_content',
+            "tipuesearch": 'tipuesearch/tipuesearch.min',
+        },
+    });
+    require(
+        ["tipuesearch_content", "tipuesearch_set", "tipuesearch"],
+        function(){
+            // 本地搜索
+            $('#tipue_search_input').tipuesearch({
+                show: 8, // 一页显示8个
+                wholeWords: false, // 中文搜索需要设置为false
+                showTitleCount: false, // 搜索结果个数无需展示
+            });
+
+            function getURLP(name) {
+                var locSearch = location.search;
+                var splitted = (new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(locSearch) || [, ""]);
+                var searchString = splitted[1].replace(/\+/g, '%20');
+                try {
+                    searchString = decodeURIComponent(searchString);
+                }
+                catch (e) {
+                    searchString = unescape(searchString);
+                }
+                return searchString || null;
+            }
+
+            // 填写搜索内容
+            $("#tipue_search_input").html(getURLP('q'));
+        }
+    )
+</script>
+{% endblock %}
+
+{% block content %}
+<div role="main" class="content clearfix">
+    <div class="wrapper main search_warpper">
+        <h2>Posts article under Search: </h2>
+
+        <div class="tipue_search_group">
+            <input type="text" name="q" id="tipue_search_input" pattern=".{3,}" title="At least 3 characters" required>
+            <button type="submit" class="tipue_search_button">
+                <div class="tipue_search_icon">&#9906;</div>
+            </button>
+        </div>
+
+        <div id="tipue_search_content"></div>
+    </div>
+</div>
+{% endblock %}

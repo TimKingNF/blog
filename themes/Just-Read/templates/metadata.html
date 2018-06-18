@@ -1,0 +1,57 @@
+{% if article %}
+<div class="wrapper meta">
+	<ul class="nav">
+		<li><a href="{{ SITEURL }}/index.html">Home</a></li>
+		<li><a href="{{ SITEURL }}/archives.html">Archive</a></li>
+		<li><a href="{{ SITEURL }}/Tags.html">Tags</a></li>
+		<li><a href="{{ SITEURL }}/Categories.html">Categories</a></li>
+
+		{% for name, link in SOCIAL %}
+		<li><a href="{{ link }}">{{ name }}</a></li>
+		{% endfor %}
+	</ul>
+
+	<div class="search_warpper">
+		<h2>Search</h2>
+		<form action="{{ SITEURL }}/search.html">
+			<div class="tipue_search_group">
+			<input type="text" name="q" class="search_text" pattern=".{3,}" title="At least 3 characters" required>
+			</div>
+		</form>
+
+		<div id="tipue_search_content"></div>
+	</div>
+</div>
+
+<div class="meta wrapper">
+	<time datetime="{{ article.date.isoformat() }}" pubdate>
+		{{ article.locale_date }}
+	</time>
+
+	{% if article.modified %}
+	Last modified:
+	<time datetime="{{ article.modified.isoformat() }}" pubdate>
+		{{ article.modified.strftime('%Y-%m-%d') }}
+	</time>
+	{% endif %}
+
+	<ul class="tag clearfix">
+		<li><a href="{{ SITEURL }}/{{ article.category.url }}">{{ article.category }}</a></li>
+
+	</ul>
+
+	<ul class="tag clearfix">
+		{% if article.tags %}
+			{% for tag in article.tags %}
+				<li><a href="{{ SITEURL }}/{{ tag.url }}">{{ tag }}</a></li>
+			{% endfor %}
+		{% endif %}
+	</ul>
+
+	{% if article.toc %}
+	<nav class="toc">
+		{{ article.toc }}
+	</nav>
+	{% endif %}
+</div>
+{% endif %}
