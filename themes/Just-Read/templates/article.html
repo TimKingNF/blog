@@ -13,9 +13,18 @@
 			"plotly-latest": 'js/plotly-latest.min',
 			"embed-amd": "js/embed-amd",
 		},
+		waitSeconds: 0, // 设置模块等待js加载
 	});
 	require(
-		['plotly-latest', "embed-amd"],
+		[
+			{% if 'plotly' in article.tags %}
+			'plotly-latest',
+			{% endif %}
+
+			{% if 'ipywidgets' in article.tags %}
+			"embed-amd",
+			{% endif %}
+		],
 		function(){
 			// 固定元素
 			$(".toc, .search_warpper").stick_in_parent({
