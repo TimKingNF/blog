@@ -5,28 +5,28 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://timkingnf.github.io/blog/</loc>
-<lastmod>2018-06-18T10:33:56-00:00</lastmod>
+<lastmod>2018-06-18T11:08:55-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://timkingnf.github.io/blog/archives.html</loc>
-<lastmod>2018-06-18T10:33:56-00:00</lastmod>
+<lastmod>2018-06-18T11:08:55-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://timkingnf.github.io/blog/tags.html</loc>
-<lastmod>2018-06-18T10:33:56-00:00</lastmod>
+<lastmod>2018-06-18T11:08:55-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://timkingnf.github.io/blog/categories.html</loc>
-<lastmod>2018-06-18T10:33:56-00:00</lastmod>
+<lastmod>2018-06-18T11:08:55-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
@@ -103,6 +103,13 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://timkingnf.github.io/blog/tag/plotly.html</loc>
+<lastmod>2018-05-27T16:00:00+08:06</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
+<loc>https://timkingnf.github.io/blog/tag/ipywidgets.html</loc>
 <lastmod>2018-05-27T16:00:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
