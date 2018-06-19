@@ -92,7 +92,7 @@
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>这个章节综合了第三章 &laquo;列表与元组&raquo; 和第四章 &laquo;字典与集合&raquo; 两个章节，说明在性能优化方面选择合适的数据结构有多么重要，以及他们之所以拖慢代码运行效率的原因。</p>
+<p>这个章节综合了第三章 &laquo;列表与元组&raquo; 和第四章 &laquo;字典与集合&raquo; 、第五章 &laquo;生成器与迭代器&raquo; 三个章节，说明在性能优化方面选择合适的数据结构有多么重要，以及他们之所以拖慢代码运行效率的原因。</p>
 </div>
 </div>
 </div>
@@ -554,6 +554,286 @@ New York 其在字典空间的下标为 6 <code>ord('N') &amp; 0b111 = 78 &amp; 
 </div>
 </div>
 </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="生成器与迭代器">生成器与迭代器<a class="anchor-link" href="#生成器与迭代器">&para;</a></h2><p>生成器最常见的一个用法就是如下这种:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_list</span><span class="p">(</span><span class="n">number</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">i</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>这段代码本质上和range并没有区别，都是返回一个数组列表，和普通的循环返回列表相比，这样的操作会更加节省内存。这时因为通过在迭代的过程中保存了上下文的环境，我们只读取我们需要的值，而无需花费更多的空间去存储我们最终只会用到一次而不得不存储的一个列表。</p>
+<p>在python2中，range是普通的循环，则xrange是生成器。这一点在python3中得到整合。</p>
+<p>另外，for循环要求被循环的对象支持迭代。我们可以通过对一个自定义对象定义<code>__iter__</code>方法来支持迭代。<br/>
+同样的，我们可以使用 <code>iter</code> 函数来获得一个对象的 <code>__iter</code> 属性。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="迭代器的调用">迭代器的调用<a class="anchor-link" href="#迭代器的调用">&para;</a></h3><p>我们可以使用以下两种方式来调用我们的迭代器。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">get_list</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>0
+1
+2
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">get_list</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="c1"># python3.6 之前可以使用 f.next()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+        <span class="k">break</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>0
+1
+2
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>同样的我们可以用列表推导式，像列表一样获取值。这将会返回一个<code>generator</code>对象，这对于我们后面的迭代器延时估值有关（书中原称，我不是很能理解这个翻译。姑且就认为是对迭代器的返回值进行分组分片等操作）。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">get_list</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt output_prompt">Out[14]:</div>
+<div class="output_text output_subarea output_execute_result">
+<pre>&lt;generator object &lt;genexpr&gt; at 0x10dd84620&gt;</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="迭代器的延时估值">迭代器的延时估值<a class="anchor-link" href="#迭代器的延时估值">&para;</a></h3><p>正常的迭代器调用都是单向的，我们只能够拿到当前的值，而无法获取到其他值。<br/>
+利用标准库 <code>itertools</code> 可以做到这一点。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">itertools</span>
+<span class="c1"># 对一个生成器切片</span>
+<span class="nb">tuple</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">get_list</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span> <span class="c1"># 此处直接切片会返回一个迭代对象，然后我们通过tuple去获取其所有值</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt output_prompt">Out[16]:</div>
+<div class="output_text output_subarea output_execute_result">
+<pre>(3, 4, 5)</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># 连接多个生成器</span>
+<span class="nb">tuple</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">get_list</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">get_list</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">get_list</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt output_prompt">Out[20]:</div>
+<div class="output_text output_subarea output_execute_result">
+<pre>(0, 1, 2, 0, 1, 2, 0, 1, 2)</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># 对生成器进行分组</span>
+<span class="k">def</span> <span class="nf">even_number</span><span class="p">(</span><span class="n">iterable</span><span class="p">):</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">is_even</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">even_number</span><span class="p">(</span><span class="n">get_list</span><span class="p">(</span><span class="mi">5</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">is_even</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="c1"># 注意该groupby必须要求 序列是连续的</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>True (0,)
+False (1,)
+True (2,)
+False (3,)
+True (4,)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># 对生成器过滤</span>
+<span class="n">even_list</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">filterfalse</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="ow">not</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">even_number</span><span class="p">(</span><span class="n">get_list</span><span class="p">(</span><span class="mi">5</span><span class="p">)))</span>
+<span class="n">is_even</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">even_list</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">is_even</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>True (0,)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>最后再说明一下这样做的意义，和普通的代码流程不同，这样的操作只是对代码逻辑设置了一条流水线，在最终的 <code>tuple</code> 和 <code>next</code> 没有调用之前，实际上是没有执行的。</p>
+<p>这样，只有明确条件中目标元素的计算才会被执行，并且如果出现了一个提前终止的条件，那么就降低整体的运行时间。<br/>
+我们通过修改以上代码来佐证这一点。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_list</span><span class="p">(</span><span class="n">number</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"number generator start ..."</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">i</span>
+        
+<span class="n">iterable</span> <span class="o">=</span> <span class="n">even_number</span><span class="p">(</span><span class="n">get_list</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"gen iterable. but it not run..."</span><span class="p">)</span>
+<span class="n">even_list</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">filterfalse</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="ow">not</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">iterable</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">is_even</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">even_list</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">is_even</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>gen iterable. but it not run...
+number generator start ...
+True (0,)
+True (2,)
+True (4,)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 </p>
 
 			<!-- <a href="https://twitter.com/share" class="twitter-share-button" data-via="" data-lang="en" data-size="large" data-related="">Tweet</a>
@@ -606,6 +886,10 @@ New York 其在字典空间的下标为 6 <code>ord('N') &amp; 0b111 = 78 &amp; 
 		2018-06-16
 	</time>
 
+	Last modified:
+	<time datetime="2018-06-18T00:00:00+08:00" pubdate>
+		2018-06-18
+	</time>
 
 	<ul class="tag clearfix">
 		<li><a href="https://timkingnf.github.io/blog/category/python.html">Python</a></li>
@@ -617,7 +901,7 @@ New York 其在字典空间的下标为 6 <code>ord('N') &amp; 0b111 = 78 &amp; 
 	</ul>
 
 	<nav class="toc">
-		<div id="toc"><ul><li><a class="toc-href" href="#数组" title="数组&para;">数组&para;</a><ul><li><a class="toc-href" href="#数组的搜索" title="数组的搜索&para;">数组的搜索&para;</a></li><li><a class="toc-href" href="#数据的排序" title="数据的排序&para;">数据的排序&para;</a></li><li><a class="toc-href" href="#更有效的搜索" title="更有效的搜索&para;">更有效的搜索&para;</a></li><li><a class="toc-href" href="#数组的内存分配" title="数组的内存分配&para;">数组的内存分配&para;</a></li></ul></li><li><a class="toc-href" href="#元祖_1" title="元祖&para;">元祖&para;</a><ul><li><a class="toc-href" href="#元祖的内存分配" title="元祖的内存分配&para;">元祖的内存分配&para;</a></li><li><a class="toc-href" href="#元祖的效率" title="元祖的效率&para;">元祖的效率&para;</a></li></ul></li><li><a class="toc-href" href="#字典_1" title="字典&para;">字典&para;</a><ul><li><a class="toc-href" href="#字典的散列实现" title="字典的散列实现&para;">字典的散列实现&para;</a></li><li><a class="toc-href" href="#字典的插入" title="字典的插入&para;">字典的插入&para;</a></li><li><a class="toc-href" href="#字典的大小" title="字典的大小&para;">字典的大小&para;</a></li><li><a class="toc-href" href="#字典的获取与删除" title="字典的获取与删除&para;">字典的获取与删除&para;</a></li><li><a class="toc-href" href="#散列函数" title="散列函数&para;">散列函数&para;</a></li></ul></li><li><a class="toc-href" href="#集合_1" title="集合&para;">集合&para;</a></li><li><a class="toc-href" href="#python中的命名空间" title="python中的命名空间&para;">python中的命名空间&para;</a></li></ul></div>
+		<div id="toc"><ul><li><a class="toc-href" href="#数组" title="数组&para;">数组&para;</a><ul><li><a class="toc-href" href="#数组的搜索" title="数组的搜索&para;">数组的搜索&para;</a></li><li><a class="toc-href" href="#数据的排序" title="数据的排序&para;">数据的排序&para;</a></li><li><a class="toc-href" href="#更有效的搜索" title="更有效的搜索&para;">更有效的搜索&para;</a></li><li><a class="toc-href" href="#数组的内存分配" title="数组的内存分配&para;">数组的内存分配&para;</a></li></ul></li><li><a class="toc-href" href="#元祖_1" title="元祖&para;">元祖&para;</a><ul><li><a class="toc-href" href="#元祖的内存分配" title="元祖的内存分配&para;">元祖的内存分配&para;</a></li><li><a class="toc-href" href="#元祖的效率" title="元祖的效率&para;">元祖的效率&para;</a></li></ul></li><li><a class="toc-href" href="#字典_1" title="字典&para;">字典&para;</a><ul><li><a class="toc-href" href="#字典的散列实现" title="字典的散列实现&para;">字典的散列实现&para;</a></li><li><a class="toc-href" href="#字典的插入" title="字典的插入&para;">字典的插入&para;</a></li><li><a class="toc-href" href="#字典的大小" title="字典的大小&para;">字典的大小&para;</a></li><li><a class="toc-href" href="#字典的获取与删除" title="字典的获取与删除&para;">字典的获取与删除&para;</a></li><li><a class="toc-href" href="#散列函数" title="散列函数&para;">散列函数&para;</a></li></ul></li><li><a class="toc-href" href="#集合_1" title="集合&para;">集合&para;</a></li><li><a class="toc-href" href="#python中的命名空间" title="python中的命名空间&para;">python中的命名空间&para;</a></li><li><a class="toc-href" href="#生成器与迭代器" title="生成器与迭代器&para;">生成器与迭代器&para;</a><ul><li><a class="toc-href" href="#迭代器的调用" title="迭代器的调用&para;">迭代器的调用&para;</a></li><li><a class="toc-href" href="#迭代器的延时估值" title="迭代器的延时估值&para;">迭代器的延时估值&para;</a></li></ul></li></ul></div>
 	</nav>
 </div>
 
