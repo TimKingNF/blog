@@ -5,30 +5,37 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://timkingnf.github.io/blog/</loc>
-<lastmod>2018-06-21T00:15:19-00:00</lastmod>
+<lastmod>2018-06-22T00:18:16-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://timkingnf.github.io/blog/archives.html</loc>
-<lastmod>2018-06-21T00:15:19-00:00</lastmod>
+<lastmod>2018-06-22T00:18:16-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://timkingnf.github.io/blog/tags.html</loc>
-<lastmod>2018-06-21T00:15:19-00:00</lastmod>
+<lastmod>2018-06-22T00:18:16-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://timkingnf.github.io/blog/categories.html</loc>
-<lastmod>2018-06-21T00:15:19-00:00</lastmod>
+<lastmod>2018-06-22T00:18:16-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
+</url>
+
+<url>
+<loc>https://timkingnf.github.io/blog/mysql-online-ddl-and-optimize.html</loc>
+<lastmod>2018-06-21T00:00:00+08:00</lastmod>
+<changefreq>monthly</changefreq>
+<priority>0.7</priority>
 </url>
 
 <url>
@@ -74,6 +81,13 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 </url>
 
 <url>
+<loc>https://timkingnf.github.io/blog/category/mysql.html</loc>
+<lastmod>2018-06-21T00:00:00+08:06</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
 <loc>https://timkingnf.github.io/blog/category/python.html</loc>
 <lastmod>2018-06-18T00:00:00+08:06</lastmod>
 <changefreq>daily</changefreq>
@@ -83,6 +97,13 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 <loc>https://timkingnf.github.io/blog/category/shi-yi.html</loc>
 <lastmod>2018-05-27T16:00:00+08:06</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
+<loc>https://timkingnf.github.io/blog/tag/shu-ju-ku.html</loc>
+<lastmod>2018-06-21T00:00:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
@@ -145,7 +166,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://timkingnf.github.io/blog/author/timking.html</loc>
-<lastmod>2018-06-20T00:00:00+08:06</lastmod>
+<lastmod>2018-06-21T00:00:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>

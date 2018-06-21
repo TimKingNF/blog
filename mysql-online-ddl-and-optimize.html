@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="">
+<head>
+	<meta charset="utf-8"/>
+	<title>Mysql Online DDL 和碎片整理 - 小花园</title>
+
+	<meta name="author" content="timking" />
+	<meta name="copyright" content="timking" />
+
+	<meta property="og:site_name" content="小花园" />
+
+
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="Mysql Online DDL 和碎片整理" />
+	<meta name="date" content="2018-06-21 00:00:00+08:00" />
+	<meta property="og:type" content="article" />
+	<meta property="og:locale" content="en" />
+	<meta property="og:published_time" content="2018-06-21 00:00:00+08:00" />
+	<meta property="og:title" content="Mysql Online DDL 和碎片整理" />
+	<meta property="og:url" content="https://timkingnf.github.io/blog/mysql-online-ddl-and-optimize.html" />
+	<meta property="og:description" content="记录一下工作上对于大表的 alter 操作和整理数据库碎片的问题。" />
+	<meta name="description" content="记录一下工作上对于大表的 alter 操作和整理数据库碎片的问题。" />
+
+	<meta name="HandheldFriendly" content="True" />
+	<meta name="MobileOptimized" content="320" />
+	<meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0" />
+	<link rel="shortcut icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link rel="icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link href='https://fonts.googleapis.com/css?family=Droid+Sans:700,400|Droid+Sans+Mono' rel='stylesheet' type='text/css' />
+	<link rel="stylesheet" href="https://timkingnf.github.io/blog/theme/css/main.css" type="text/css" />
+
+	<!--[if lt IE 9]>
+		<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script src="https://cdn.rawgit.com/leafo/sticky-kit/v1.1.2/jquery.sticky-kit.min.js"></script>
+<script src="https://timkingnf.github.io/blog/theme/js/require.js"></script>
+<script type="text/javascript">
+	requirejs.config({
+		baseUrl: "theme",
+		paths: {
+			"plotly-latest": 'js/plotly-latest.min',
+			"embed-amd": "js/embed-amd",
+		},
+		waitSeconds: 0, // 设置模块等待js加载
+	});
+	require(
+		[
+
+		],
+		function(){
+			// 固定元素
+			$(".toc, .search_warpper").stick_in_parent({
+				parent: ".content"
+			});
+		}
+	)
+</script>
+
+	<link href="https://timkingnf.github.io/blog/feeds/all.rss.xml" type="application/atom+xml" rel="alternate" title="小花园 RSS Feed" />
+
+</head>
+
+<body>
+	<header class="clearfix" role="banner">
+		<!-- <div class="wrapper">
+			<h1 class="huge">
+				<a href="https://timkingnf.github.io/blog">小花园</a>
+			</h1>
+		</div> -->
+	</header>
+
+<div role="main" class="content clearfix">
+	<article>
+		<div class="post wrapper">
+			<h1>Mysql Online DDL 和碎片整理</h1>
+			<p>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>这里记录线上遇到的一个问题，在线上环境遇到一个千万级的大表占用了太大的存储空间，需要把一部分的数据落地归档。</p>
+<p>在删除了相应的数据库记录之后，却发现对应的空间没有被释放，导致数据库可用空间还是不足。</p>
+<p>这里刚开始猜想就可能是数据库碎片的问题，去查阅了相关资料之后发现确实是数据库碎片的问题。</p>
+<p>所以就需要做数据库的碎片整理，在这里做下笔记。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="碎片的产生">碎片的产生<a class="anchor-link" href="#碎片的产生">&para;</a></h2><ul>
+<li>表的存储会出现碎片化，每当删除了一行内容，该段空间就会变为空白、被留空，而在一段时间内的大量删除操作，会使这种留空的空间变得比存储列表内容所使用的空间更大；</li>
+</ul>
+<ul>
+<li>当MySQL对数据进行扫描时，它扫描的对象实际是列表的容量需求上限，也就是数据被写入的区域中处于峰值位置的部分；</li>
+</ul>
+<ul>
+<li>当执行插入操作时，MySQL会尝试使用空白空间，但如果某个空白空间一直没有被大小合适的数据占用，仍然无法将其彻底占用，就形成了碎片；</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="为什么需要释放碎片">为什么需要释放碎片<a class="anchor-link" href="#为什么需要释放碎片">&para;</a></h2><p>释放碎片的目的就是减少表数据与表索引的物理空间，并且当碎片产生较多时，即使表的实际数据并不多，但是mysql仍会将其当成一个大表进行操作，在查询的时候需要跳过多个碎片空间，这样就会极大的影响查询性能。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="sql查询">sql查询<a class="anchor-link" href="#sql查询">&para;</a></h2><h3 id="查看表碎片的大小">查看表碎片的大小<a class="anchor-link" href="#查看表碎片的大小">&para;</a></h3><div class="highlight"><pre><span></span><span class="k">SHOW</span> <span class="k">TABLE</span> <span class="n">STATUS</span> <span class="k">LIKE</span> <span class="s1">'表名'</span><span class="p">;</span>
+</pre></div>
+<p>结果中 <code>Data_free</code> 列就表示碎片的大小</p>
+<h3 id="列出所有已经产生碎片的表">列出所有已经产生碎片的表<a class="anchor-link" href="#列出所有已经产生碎片的表">&para;</a></h3><div class="highlight"><pre><span></span><span class="k">select</span> <span class="n">table_schema</span> <span class="n">db</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">data_free</span><span class="p">,</span> <span class="kp">engine</span>     
+<span class="k">from</span> <span class="n">information_schema</span><span class="p">.</span><span class="kp">tables</span> 
+<span class="k">where</span> <span class="n">table_schema</span> <span class="k">not</span> <span class="k">in</span> <span class="p">(</span><span class="s1">'information_schema'</span><span class="p">,</span> <span class="s1">'mysql'</span><span class="p">)</span>  <span class="k">and</span> <span class="n">data_free</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="清除表碎片_1">清除表碎片<a class="anchor-link" href="#清除表碎片">&para;</a></h2><p>需要注意的是，清除表碎片操作会锁表。所以需要考虑在执行操作的时候对线上业务的影响。</p>
+<h3 id="MyISAM-引擎">MyISAM 引擎<a class="anchor-link" href="#MyISAM-引擎">&para;</a></h3><div class="highlight"><pre><span></span><span class="k">optimize</span> <span class="k">table</span> <span class="o">&lt;</span><span class="err">表名</span><span class="o">&gt;</span>
+</pre></div>
+<p>Engine不同,OPTIMIZE 的操作也不一样的,MyISAM 因为索引和数据是分开的,所以 OPTIMIZE 可以整理数据文件,并重排索引。</p>
+<h3 id="InnoDB-引擎">InnoDB 引擎<a class="anchor-link" href="#InnoDB-引擎">&para;</a></h3><div class="highlight"><pre><span></span><span class="k">alter</span> <span class="k">table</span> <span class="o">&lt;</span><span class="err">表名</span><span class="o">&gt;</span> <span class="kp">engine</span><span class="o">=</span><span class="n">InnoDB</span>
+</pre></div>
+<p>同样的，InnoDB 通过修改引擎也可以达到同样的效果。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="为了不影响线上业务_1">为了不影响线上业务<a class="anchor-link" href="#为了不影响线上业务">&para;</a></h2><p>因为整理碎片的操作会锁表，这期间的写入删除操作无法完成，因为这本质上来说是一个 <code>ddl</code>操作，这对于线上业务来说是不可接受的。</p>
+<p>目前InnoDB引擎是通过以下步骤来进行DDL的：</p>
+<ul>
+<li>按照原始表（original_table）的表结构和DDL语句，新建一个不可见的临时表（tmp_table）</li>
+</ul>
+<ul>
+<li>在原表上加write lock，阻塞所有更新操作（insert、delete、update等）</li>
+</ul>
+<ul>
+<li>执行insert into tmp_table select * from original_table ( copy table 操作 )</li>
+</ul>
+<ul>
+<li>rename original_table和tmp_table，最后drop original_table</li>
+</ul>
+<ul>
+<li>释放 write lock。</li>
+</ul>
+<p>我们可以看见在InnoDB执行DDL的时候，原表是只能读不能写的。</p>
+<p>所以针对线上大表的操作，常见方法是放在业务的低峰期进行操作。但是这样同样会有丢失数据的可能，所以我们可以利用一些 <code>online-ddl</code> 工具来完成。</p>
+<p><code>ddl</code> 指的是对表的 <code>alter</code>操作，这期间都会进行锁表操作。</p>
+<p>而 <code>online-ddl</code> 的原理就是通过触发器保持新表与旧表的数据一致，在最后旧版数据拷贝完成之后再将新表重命名为旧表。</p>
+<p>我们可以通过工具 <code>pt-online-schema-change</code> 来完成这一操作。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="pt-osc">pt-osc<a class="anchor-link" href="#pt-osc">&para;</a></h2><p>pt-online-schema-change 工具需要先安装 percona-toolkit 工具包 <a href="https://www.percona.com/downloads/percona-toolki">下载地址</a></p>
+<p>其特点是修改过程中不会造成读写阻塞。但是 pt-online-schema-change 也有其限制。</p>
+<ul>
+<li>首先要修改的表不能存在触发器，因为 pt-online-schema-change 是通过对修改表添加触发器来保持数据一致性，如果原表存在触发器，则会因为相同触发器只能存在一个，导致工具不予执行。</li>
+</ul>
+<ul>
+<li>其次，如果表有外键，除非使用 --alter-foreign-keys-method 指定特定的值，否则工具不予执行。</li>
+</ul>
+<ul>
+<li>并且在使用之前需要对磁盘容量进行评估，因为 pt-osc 本质上是对数据表的一次复制，所以复制的新表还会占用一定空间，这会增加一倍的空间和索引。</li>
+</ul>
+<p>这里给出一下示例的参数:</p>
+<div class="highlight"><pre><span></span>pt-online-schema-change  
+  -h地址
+  -P端口号
+  -u用户名
+  -p密码   
+  --database<span class="o">=</span>数据库
+  <span class="nv">t</span><span class="o">=</span>表名字
+  --charset<span class="o">=</span>utf8 
+  --max-lag<span class="o">=</span><span class="m">300</span> 
+  --check-interval<span class="o">=</span><span class="m">5</span> 
+  --alter<span class="o">=</span><span class="s2">"ENGINE=InnoDB"</span> 
+  --max-load<span class="o">=</span><span class="s2">"Threads_running:400"</span> 
+  --critical-load<span class="o">=</span><span class="s2">"Threads_running:400"</span> 
+  --nocheck-replication-filters 
+  --alter-foreign-keys-method<span class="o">=</span>auto  
+  --execute
+</pre></div>
+<p>这里注意一下 <code>alter</code> 的写法。不需要 ALTER TABLE 关键字。与原始ddl一样可以指定多个更改，用逗号分隔。</p>
+<ul>
+<li>绝大部分情况下表上需要有主键或唯一索引，因为工具在运行当中为了保证新表也是最新的，需要旧表上创建 DELETE和UPDATE 触发器，同步到新表的时候有主键会更快。个别情况是，当alter操作就是在c1列上建立主键时，DELETE触发器将基于c1列。</li>
+</ul>
+<ul>
+<li>子句不支持 rename 去给表重命名。</li>
+</ul>
+<ul>
+<li>alter命令原表就不支持给索引重命名，需要先drop再add，在pt-osc也一样。(mysql 5.7 支持 <code>RENAME INDEX old_index_name TO new_index_name</code> )，但给字段重命名，千万不要drop-add，整列数据会丢失，使用change col1 col1_new type constraint（保持类型和约束一致，否则相当于修改 column type，不能online）</li>
+</ul>
+<ul>
+<li>子句如果是add column并且定义了not null，那么必须指定default值，否则会失败。</li>
+</ul>
+<ul>
+<li>如果要删除外键（名 fk_foo），使用工具的时候外键名要加下划线，比如--alter "DROP FOREIGN KEY _fk_foo"</li>
+</ul>
+<p>另外，在线上阿里云执行 pt-osc 操作的时候会报一个错。</p>
+<pre><code>Can't use an undefined value as an ARRAY reference at /usr/bin/pt-online-schema-change line 7335.</code></pre>
+<p>给命令添加一个 <code>--no-version-check</code> 选项就好了。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="总结">总结<a class="anchor-link" href="#总结">&para;</a></h2><p>最后整理一下在何时选用源生的dll，何时使用pt-osc。</p>
+<ul>
+<li>在表数据较大，copy table 成本较高的时候 不适合使用源生dll</li>
+</ul>
+<ul>
+<li>pt-osc 不适合使用在有触发器的表上</li>
+</ul>
+<ul>
+<li>修改索引、外键、列名时，优先采用源生dll，并指定 ALGORITHM=INPLACE</li>
+</ul>
+<ul>
+<li>pt-osc比online ddl要慢一倍左右，因为它是根据负载调整的</li>
+</ul>
+<ul>
+<li>不管什么时候都要在业务低峰的时候进行操作</li>
+</ul>
+<ul>
+<li>特殊情况需要利用主从特性，先alter从库，主备切换，再改原主库</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="tips">tips<a class="anchor-link" href="#tips">&para;</a></h2><p>哈哈。这篇文章有点灌水了，毕竟只是简单记录了一个工作上遇到的一个小问题。好多文字都是直接 copy 其他的文章。</p>
+<p>不过也确实是发现了很多没有注意到的地方，看来还有很多不足的地方啊。</p>
+<p>参考文章:</p>
+<ul>
+<li><p><a href="http://seanlook.com/2016/05/27/mysql-pt-online-schema-change/">http://seanlook.com/2016/05/27/mysql-pt-online-schema-change/</a></p>
+</li>
+<li><p><a href="http://blog.51cto.com/dadaman/1957229">http://blog.51cto.com/dadaman/1957229</a></p>
+</li>
+<li><p><a href="https://blog.csdn.net/xlgen157387/article/details/50728737">https://blog.csdn.net/xlgen157387/article/details/50728737</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</p>
+
+			<!-- <a href="https://twitter.com/share" class="twitter-share-button" data-via="" data-lang="en" data-size="large" data-related="">Tweet</a>
+			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script> -->
+
+			<div class="page-nav">
+				<a class="btn left" href="https://timkingnf.github.io/blog/remove-duplicates-from-sorted-array.html">
+					← 删除排序数组中的重复项
+				</a>
+			</div>
+
+			<div class="comments">
+				<h2>Comments !</h2>
+			    <div id="disqus_thread"></div>
+			    <script type="text/javascript">
+			       var disqus_identifier = "mysql-online-ddl-and-optimize.html";
+			       (function() {
+			       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+			       dsq.src = 'https://https-timkingnf-github-io-blog.disqus.com/embed.js';
+			       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+			      })();
+				</script>
+			</div>
+		</div>
+
+<div class="wrapper meta">
+	<ul class="nav">
+		<li><a href="https://timkingnf.github.io/blog/index.html">Home</a></li>
+		<li><a href="https://timkingnf.github.io/blog/archives.html">Archive</a></li>
+		<li><a href="https://timkingnf.github.io/blog/tags.html">Tags</a></li>
+		<li><a href="https://timkingnf.github.io/blog/categories.html">Categories</a></li>
+
+		<li><a href="https://github.com/TimKingNF">GitHub</a></li>
+		<li><a href="mailto:timking.nf@foxmail.com">Email</a></li>
+	</ul>
+
+	<div class="search_warpper">
+		<h2>Search</h2>
+		<form action="https://timkingnf.github.io/blog/search.html">
+			<div class="tipue_search_group">
+			<input type="text" name="q" class="search_text" pattern=".{3,}" title="At least 3 characters" required>
+			</div>
+		</form>
+
+		<div id="tipue_search_content"></div>
+	</div>
+</div>
+
+<div class="meta wrapper">
+	<time datetime="2018-06-21T00:00:00+08:00" pubdate>
+		2018-06-21
+	</time>
+
+
+	<ul class="tag clearfix">
+		<li><a href="https://timkingnf.github.io/blog/category/mysql.html">Mysql</a></li>
+
+	</ul>
+
+	<ul class="tag clearfix">
+				<li><a href="https://timkingnf.github.io/blog/tag/shu-ju-ku.html">数据库</a></li>
+	</ul>
+
+	<nav class="toc">
+		<div id="toc"><ul><li><a class="toc-href" href="#碎片的产生" title="碎片的产生&para;">碎片的产生&para;</a></li><li><a class="toc-href" href="#为什么需要释放碎片" title="为什么需要释放碎片&para;">为什么需要释放碎片&para;</a></li><li><a class="toc-href" href="#sql查询" title="sql查询&para;">sql查询&para;</a><ul><li><a class="toc-href" href="#查看表碎片的大小" title="查看表碎片的大小&para;">查看表碎片的大小&para;</a></li><li><a class="toc-href" href="#列出所有已经产生碎片的表" title="列出所有已经产生碎片的表&para;">列出所有已经产生碎片的表&para;</a></li></ul></li><li><a class="toc-href" href="#清除表碎片_1" title="清除表碎片&para;">清除表碎片&para;</a><ul><li><a class="toc-href" href="#MyISAM-引擎" title="MyISAM 引擎&para;">MyISAM 引擎&para;</a></li><li><a class="toc-href" href="#InnoDB-引擎" title="InnoDB 引擎&para;">InnoDB 引擎&para;</a></li></ul></li><li><a class="toc-href" href="#为了不影响线上业务_1" title="为了不影响线上业务&para;">为了不影响线上业务&para;</a></li><li><a class="toc-href" href="#pt-osc" title="pt-osc&para;">pt-osc&para;</a></li><li><a class="toc-href" href="#总结" title="总结&para;">总结&para;</a></li><li><a class="toc-href" href="#tips" title="tips&para;">tips&para;</a></li></ul></div>
+	</nav>
+</div>
+
+	</article>
+</div>
+
+	<a href="#" class="scoll-top"></a>
+
+	<!-- <footer class="clearfix">
+
+		<a href="#" class="scoll-top"></a>
+
+	</footer> -->
+
+	<script>
+	  var _gaq=[['_setAccount','UA-120924939-1'],['_trackPageview']];
+	  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+	  g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+	  s.parentNode.insertBefore(g,s)}(document,'script'));
+	</script>
+
+</body>
+</html>
