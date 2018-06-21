@@ -56,6 +56,7 @@ LINKS = ()
 # Social widget
 SOCIAL = (
     ('GitHub', "https://github.com/TimKingNF"),
+    ('Email', "mailto:timking.nf@foxmail.com"),
 )
 
 # 告诉 pelican 在生成html的时候激活插件
