@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="">
+<head>
+	<meta charset="utf-8"/>
+	<title>买卖股票的最佳时机 II - 小花园</title>
+
+	<meta name="author" content="timking" />
+	<meta name="copyright" content="timking" />
+
+	<meta property="og:site_name" content="小花园" />
+
+
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="买卖股票的最佳时机 II" />
+	<meta name="date" content="2018-06-22 00:00:00+08:00" />
+	<meta property="og:type" content="article" />
+	<meta property="og:locale" content="en" />
+	<meta property="og:published_time" content="2018-06-22 00:00:00+08:00" />
+	<meta property="og:title" content="买卖股票的最佳时机 II" />
+	<meta property="og:url" content="https://timkingnf.github.io/blog/top-interview-questions-easy.html" />
+	<meta property="og:description" content="LeetCode - 探索 - 初级算法" />
+	<meta name="description" content="LeetCode - 探索 - 初级算法" />
+
+	<meta name="HandheldFriendly" content="True" />
+	<meta name="MobileOptimized" content="320" />
+	<meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0" />
+	<link rel="shortcut icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link rel="icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link href='https://fonts.googleapis.com/css?family=Droid+Sans:700,400|Droid+Sans+Mono' rel='stylesheet' type='text/css' />
+	<link rel="stylesheet" href="https://timkingnf.github.io/blog/theme/css/main.css" type="text/css" />
+
+	<!--[if lt IE 9]>
+		<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script src="https://cdn.rawgit.com/leafo/sticky-kit/v1.1.2/jquery.sticky-kit.min.js"></script>
+<script src="https://timkingnf.github.io/blog/theme/js/require.js"></script>
+<script type="text/javascript">
+	requirejs.config({
+		baseUrl: "theme",
+		paths: {
+			"plotly-latest": 'js/plotly-latest.min',
+			"embed-amd": "js/embed-amd",
+		},
+		waitSeconds: 0, // 设置模块等待js加载
+	});
+	require(
+		[
+
+		],
+		function(){
+			// 固定元素
+			$(".toc, .search_warpper").stick_in_parent({
+				parent: ".content"
+			});
+		}
+	)
+</script>
+
+	<link href="https://timkingnf.github.io/blog/feeds/all.rss.xml" type="application/atom+xml" rel="alternate" title="小花园 RSS Feed" />
+
+</head>
+
+<body>
+	<header class="clearfix" role="banner">
+		<!-- <div class="wrapper">
+			<h1 class="huge">
+				<a href="https://timkingnf.github.io/blog">小花园</a>
+			</h1>
+		</div> -->
+	</header>
+
+<div role="main" class="content clearfix">
+	<article>
+		<div class="post wrapper">
+			<h1>买卖股票的最佳时机 II</h1>
+			<p>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p><a href="https://leetcode-cn.com/explore/interview/card/top-interview-questions-easy/1/array/22/">原文链接</a></p>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>给定一个数组，它的第 i 个元素是一支给定股票第 i 天的价格。</p>
+<p>设计一个算法来计算你所能获取的最大利润。你可以尽可能地完成更多的交易（多次买卖一支股票）。</p>
+<p><strong>注意</strong>：你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。</p>
+<p><strong>示例 1:</strong></p>
+<pre><code>输入: [7,1,5,3,6,4]
+输出: 7
+解释: 在第 2 天（股票价格 = 1）的时候买入，在第 3 天（股票价格 = 5）的时候卖出, 这笔交易所能获得利润 = 5-1 = 4 。
+     随后，在第 4 天（股票价格 = 3）的时候买入，在第 5 天（股票价格 = 6）的时候卖出, 这笔交易所能获得利润 = 6-3 = 3 。</code></pre>
+<p><strong>示例 2:</strong></p>
+<pre><code>输入: [1,2,3,4,5]
+输出: 4
+解释: 在第 1 天（股票价格 = 1）的时候买入，在第 5 天 （股票价格 = 5）的时候卖出, 这笔交易所能获得利润 = 5-1 = 4 。
+     注意你不能在第 1 天和第 2 天接连购买股票，之后再将它们卖出。
+     因为这样属于同时参与了多笔交易，你必须在再次购买前出售掉之前的股票。</code></pre>
+<p><strong>示例 3:</strong></p>
+<pre><code>输入: [7,6,4,3,1]
+输出: 0
+解释: 在这种情况下, 没有交易完成, 所以最大利润为 0。</code></pre>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="初步解答">初步解答<a class="anchor-link" href="#初步解答">&para;</a></h2><p>初步看了题目之后，首先想到的是，寻找一个数组中的最小值，然后从该最小值下标的右数组再找最大值，两者相减就是收益，然后再将最大值下标的右数组重复操作，得到结果。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">maxProfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prices</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        :type prices: List[int]</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        """</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prices</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="n">min_price</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">prices</span><span class="p">)</span>
+        <span class="n">min_index</span> <span class="o">=</span> <span class="n">prices</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">min_price</span><span class="p">)</span>
+        <span class="n">left_prices</span> <span class="o">=</span> <span class="n">prices</span><span class="p">[</span><span class="n">min_index</span><span class="p">:]</span>
+        <span class="n">max_price</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">left_prices</span><span class="p">)</span>
+        <span class="n">max_index</span> <span class="o">=</span> <span class="n">left_prices</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">max_price</span><span class="p">)</span> <span class="o">+</span> <span class="n">min_index</span>
+        <span class="n">benefit</span> <span class="o">=</span> <span class="n">max_price</span> <span class="o">-</span> <span class="n">min_price</span>
+        <span class="k">if</span> <span class="n">max_index</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+            <span class="n">benefit</span> <span class="o">+=</span> <span class="n">Solution</span><span class="p">()</span><span class="o">.</span><span class="n">maxProfit</span><span class="p">(</span><span class="n">prices</span><span class="p">[</span><span class="n">max_index</span><span class="p">:])</span>
+        <span class="k">return</span> <span class="n">benefit</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">Solution</span><span class="p">()</span><span class="o">.</span><span class="n">maxProfit</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt output_prompt">Out[2]:</div>
+<div class="output_text output_subarea output_execute_result">
+<pre>5</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>但是很可惜，这个结果和题目给出的结果不符。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="第二次解答">第二次解答<a class="anchor-link" href="#第二次解答">&para;</a></h2><p>再次审题之后发现，题目是要求求一个数组的最大收益。所以应当思考在何种方式下求出最大收益。</p>
+<p>通过对题目数组，我们可以计算两天收益的相邻之差，得到一个新数组。这样就将问题转化，求该数组的累计和。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">maxProfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prices</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        :type prices: List[int]</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        """</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prices</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="n">benefits</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+            <span class="n">benefit</span> <span class="o">=</span> <span class="n">prices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">prices</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">benefits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">benefit</span> <span class="k">if</span> <span class="n">benefit</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span> <span class="p">)</span>
+            <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">benefits</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>提交到LeetCode上测试通过。emmm 算法是没什么问题了，但是执行时间是属于比较 low 的那一档。</p>
+<p>接下来继续进行优化。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="优化">优化<a class="anchor-link" href="#优化">&para;</a></h2><p>优化思路：</p>
+<ul>
+<li>首先我们无需需要一个数组来存储邻接差，只需要创建一个数值来累加就好，这样就节省了一个函数调用（sum）和数组空间。</li>
+</ul>
+<ul>
+<li>其次，我们的思路是 邻接差 大于0 才累加，否则为0 。则我们可以判断 下一个值是否大于上一个值， 这样就节省一个三元表达式的判断。这里需要值得注意的是，我们需要用本地变量来保存两个值。</li>
+</ul>
+<p>以下是他们之间的执行时间，可以看到，这次修改会给我们带来 25% 的性能提升。</p>
+<p><strong>original</strong></p>
+<pre><code>2.06 &micro;s &plusmn; 8.61 ns per loop (mean &plusmn; std. dev. of 7 runs, 100000 loops each)</code></pre>
+<p><strong>第一次修改</strong></p>
+<pre><code>1.54 &micro;s &plusmn; 4.5 ns per loop (mean &plusmn; std. dev. of 7 runs, 1000000 loops each)</code></pre>
+<p>修改之后的代码如下:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">maxProfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prices</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        :type prices: List[int]</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        """</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prices</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="n">benefits</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+            <span class="n">second</span> <span class="o">=</span> <span class="n">prices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="n">prices</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">second</span> <span class="o">-</span> <span class="n">first</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">benefits</span> <span class="o">+=</span> <span class="n">second</span> <span class="o">-</span> <span class="n">first</span>
+            <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="k">return</span> <span class="n">benefits</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>提交上去之后，发现执行用例大约在60ms。再参考一下第一名 40ms 的答案。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">maxProfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prices</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        :type prices: List[int]</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        """</span>
+        <span class="n">profit</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">prices</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">prices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">prices</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">profit</span> <span class="o">+=</span> <span class="n">prices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">prices</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">profit</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">timeit</span> Solution().maxProfit(a)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>1.55 &micro;s &plusmn; 29.9 ns per loop (mean &plusmn; std. dev. of 7 runs, 1000000 loops each)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>发现差距并没有想象中的大，至此解答就到这里。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="变种问题">变种问题<a class="anchor-link" href="#变种问题">&para;</a></h2><p>我们将这个问题变种一下，求在获得最大收益的同时，给出操作方案, 在不操作的时候为0，购买的时候为1，卖出的时候为2。</p>
+<p>输出一个与 prices 等长的操作方案的 list。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">maxProfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prices</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        :type prices: List[int]</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        """</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prices</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">length</span>
+        <span class="n">benefits</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">operations</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+            <span class="n">second</span> <span class="o">=</span> <span class="n">prices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="n">prices</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">second</span> <span class="o">-</span> <span class="n">first</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">benefits</span> <span class="o">+=</span> <span class="n">second</span> <span class="o">-</span> <span class="n">first</span>
+                <span class="n">operations</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">operations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">operations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="k">return</span> <span class="n">benefits</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">operations</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Solution</span><span class="p">()</span><span class="o">.</span><span class="n">maxProfit</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt output_prompt">Out[8]:</div>
+<div class="output_text output_subarea output_execute_result">
+<pre>(7, [0, 1, 2, 1, 2, 0])</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</p>
+
+			<!-- <a href="https://twitter.com/share" class="twitter-share-button" data-via="" data-lang="en" data-size="large" data-related="">Tweet</a>
+			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script> -->
+
+			<div class="page-nav">
+				<a class="btn left" href="https://timkingnf.github.io/blog/mysql-online-ddl-and-optimize.html">
+					← Mysql Online DDL 和碎片整理
+				</a>
+			</div>
+
+			<div class="comments">
+				<h2>Comments !</h2>
+			    <div id="disqus_thread"></div>
+			    <script type="text/javascript">
+			       var disqus_identifier = "top-interview-questions-easy.html";
+			       (function() {
+			       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+			       dsq.src = 'https://https-timkingnf-github-io-blog.disqus.com/embed.js';
+			       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+			      })();
+				</script>
+			</div>
+		</div>
+
+<div class="wrapper meta">
+	<ul class="nav">
+		<li><a href="https://timkingnf.github.io/blog/index.html">Home</a></li>
+		<li><a href="https://timkingnf.github.io/blog/archives.html">Archive</a></li>
+		<li><a href="https://timkingnf.github.io/blog/tags.html">Tags</a></li>
+		<li><a href="https://timkingnf.github.io/blog/categories.html">Categories</a></li>
+
+		<li><a href="https://github.com/TimKingNF">GitHub</a></li>
+		<li><a href="mailto:timking.nf@foxmail.com">Email</a></li>
+	</ul>
+
+	<div class="search_warpper">
+		<h2>Search</h2>
+		<form action="https://timkingnf.github.io/blog/search.html">
+			<div class="tipue_search_group">
+			<input type="text" name="q" class="search_text" pattern=".{3,}" title="At least 3 characters" required>
+			</div>
+		</form>
+
+		<div id="tipue_search_content"></div>
+	</div>
+</div>
+
+<div class="meta wrapper">
+	<time datetime="2018-06-22T00:00:00+08:00" pubdate>
+		2018-06-22
+	</time>
+
+
+	<ul class="tag clearfix">
+		<li><a href="https://timkingnf.github.io/blog/category/leetcode.html">LeetCode</a></li>
+
+	</ul>
+
+	<ul class="tag clearfix">
+				<li><a href="https://timkingnf.github.io/blog/tag/shu-zu.html">数组</a></li>
+				<li><a href="https://timkingnf.github.io/blog/tag/suan-fa.html">算法</a></li>
+	</ul>
+
+	<nav class="toc">
+		<div id="toc"><ul><li><a class="toc-href" href="#初步解答" title="初步解答&para;">初步解答&para;</a></li><li><a class="toc-href" href="#第二次解答" title="第二次解答&para;">第二次解答&para;</a></li><li><a class="toc-href" href="#优化" title="优化&para;">优化&para;</a></li><li><a class="toc-href" href="#变种问题" title="变种问题&para;">变种问题&para;</a></li></ul></div>
+	</nav>
+</div>
+
+	</article>
+</div>
+
+	<a href="#" class="scoll-top"></a>
+
+	<!-- <footer class="clearfix">
+
+		<a href="#" class="scoll-top"></a>
+
+	</footer> -->
+
+	<script>
+	  var _gaq=[['_setAccount','UA-120924939-1'],['_trackPageview']];
+	  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+	  g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+	  s.parentNode.insertBefore(g,s)}(document,'script'));
+	</script>
+
+</body>
+</html>

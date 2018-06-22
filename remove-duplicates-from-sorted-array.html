@@ -1088,13 +1088,15 @@ big_list_six[:SolutionFirst().removeDuplicates(big_list_six)]
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>这和我们的预期不太一样，理论上来说，这个算法的复杂度应该要大于我们上面的解法。但事实上内置函数的执行效率上比我们快了一个数量级。</p>
-<p>事实上，这里涉及到一个点被我给忽视了。就是取值，在python中，list 的下标取值是需要从头开始数的，也就是说其复杂度为 <code>O(n)</code>，而set中取值的复杂度为 <code>O(1)</code>。这是我暂时想到的一个解释。</p>
-<p>不过这里还有几点存疑？</p>
+<p>还有几点存疑？</p>
 <ul>
-<li><p>为什么将list转置为set的时候，效率执行很快？什么原因导致的效率这么高?</p>
-</li>
-<li><p>sorted 函数的排序效率？</p>
-</li>
+<li>和转为set相比，这个算法的性能消耗点在哪里？</li>
+</ul>
+<ul>
+<li>为什么将list转置为set的时候，效率执行很快？什么原因导致的效率这么高?</li>
+</ul>
+<ul>
+<li>sorted 函数的排序效率？</li>
 </ul>
 <p>这里暂且先记下来这两个问题，等待后续解答吧。如果你有更好的解释，也可以在下面留言告诉我。</p>
 </div>
@@ -1110,7 +1112,7 @@ big_list_six[:SolutionFirst().removeDuplicates(big_list_six)]
 					← 高性能python-选择合适的数据结构
 				</a>
 				<a class="btn right" href="https://timkingnf.github.io/blog/mysql-online-ddl-and-optimize.html">
-					Mysql Online DDL 和碎片整理 ➡
+					Mysql Online DDL 和碎片整理 →
 				</a>
 			</div>
 
