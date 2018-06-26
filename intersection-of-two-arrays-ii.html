@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="">
+<head>
+	<meta charset="utf-8"/>
+	<title>两个数组的交集 II - 小花园</title>
+
+	<meta name="author" content="timking" />
+	<meta name="copyright" content="timking" />
+
+	<meta property="og:site_name" content="小花园" />
+
+
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="两个数组的交集 II" />
+	<meta name="date" content="2018-06-26 00:00:00+08:00" />
+	<meta property="og:type" content="article" />
+	<meta property="og:locale" content="en" />
+	<meta property="og:published_time" content="2018-06-26 00:00:00+08:00" />
+	<meta property="og:title" content="两个数组的交集 II" />
+	<meta property="og:url" content="https://timkingnf.github.io/blog/intersection-of-two-arrays-ii.html" />
+	<meta property="og:description" content="LeetCode - 探索 - 初级算法" />
+	<meta name="description" content="LeetCode - 探索 - 初级算法" />
+
+	<meta name="HandheldFriendly" content="True" />
+	<meta name="MobileOptimized" content="320" />
+	<meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0" />
+	<link rel="shortcut icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link rel="icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link href='https://fonts.googleapis.com/css?family=Droid+Sans:700,400|Droid+Sans+Mono' rel='stylesheet' type='text/css' />
+	<link rel="stylesheet" href="https://timkingnf.github.io/blog/theme/css/main.css" type="text/css" />
+
+	<!--[if lt IE 9]>
+		<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script src="https://cdn.rawgit.com/leafo/sticky-kit/v1.1.2/jquery.sticky-kit.min.js"></script>
+<script src="https://timkingnf.github.io/blog/theme/js/require.js"></script>
+<script type="text/javascript">
+	requirejs.config({
+		baseUrl: "theme",
+		paths: {
+			"plotly-latest": 'js/plotly-latest.min',
+			"embed-amd": "js/embed-amd",
+		},
+		waitSeconds: 0, // 设置模块等待js加载
+	});
+	require(
+		[
+
+		],
+		function(){
+			// 固定元素
+			$(".toc, .search_warpper").stick_in_parent({
+				parent: ".content"
+			});
+		}
+	)
+</script>
+
+	<link href="https://timkingnf.github.io/blog/feeds/all.rss.xml" type="application/atom+xml" rel="alternate" title="小花园 RSS Feed" />
+
+</head>
+
+<body>
+	<header class="clearfix" role="banner">
+		<!-- <div class="wrapper">
+			<h1 class="huge">
+				<a href="https://timkingnf.github.io/blog">小花园</a>
+			</h1>
+		</div> -->
+	</header>
+
+<div role="main" class="content clearfix">
+	<article>
+		<div class="post wrapper">
+			<h1>两个数组的交集 II</h1>
+			<p>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p><a href="https://leetcode-cn.com/problems/intersection-of-two-arrays-ii/description/">原文链接</a></p>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>给定两个数组，写一个方法来计算它们的交集。</p>
+<p>例如: 给定 nums1 = [1, 2, 2, 1], nums2 = [2, 2], 返回 [2, 2].</p>
+<p><strong>注意：</strong></p>
+<ul>
+<li>输出结果中每个元素出现的次数，应与元素在两个数组中出现的次数一致。</li>
+</ul>
+<ul>
+<li>我们可以不考虑输出结果的顺序。</li>
+</ul>
+<p><strong>跟进:</strong></p>
+<ul>
+<li>如果给定的数组已经排好序呢？你将如何优化你的算法？</li>
+</ul>
+<ul>
+<li>如果 nums1 的大小比 nums2 小很多，哪种方法更优？</li>
+</ul>
+<ul>
+<li>如果nums2的元素存储在磁盘上，内存是有限的，你不能一次加载所有的元素到内存中，你该怎么办？</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="初步解答">初步解答<a class="anchor-link" href="#初步解答">&para;</a></h2><p>首先先考虑如何实现这个算法。从题目看是要求返回交集数组，需要注意的地方题目也已经给标注出来了。</p>
+<p>这边不要求输出结果顺序，所以比较简单。因为要求交集元素保留在结果数组中的次数，所以 set 结构无疑是不适用的。</p>
+<p>一开始想到利用数组的特性来做，得出以下代码：</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nums1</span><span class="p">,</span> <span class="n">nums2</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        :type nums1: List[int]</span>
+<span class="sd">        :type nums2: List[int]</span>
+<span class="sd">        :rtype: List[int]</span>
+<span class="sd">        """</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">nums1</span>
+        <span class="n">in_arr</span> <span class="o">=</span> <span class="n">nums2</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nums1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nums2</span><span class="p">):</span>
+            <span class="n">rng</span> <span class="o">=</span> <span class="n">nums2</span>
+            <span class="n">in_arr</span> <span class="o">=</span> <span class="n">nums1</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">rng</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">in_arr</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">in_arr</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>但是这样做有个缺点，在一个未排序的数组中，判断是否存在 <code>in</code> 和 <code>remove</code> 操作复杂度都为 <code>O(n)</code>, 这将会带来额外开销。</p>
+<p>所以，其实这个算法在数据量比较大的情况下是不适用的。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="优化">优化<a class="anchor-link" href="#优化">&para;</a></h2><p>这边就按给定的跟进思路来继续优化。</p>
+<p>如果给定的数组是已经优化好的呢，或者一个数组要比另一个数组小的多。</p>
+<p>从这一点上考虑，假定是排序好的数组，可以通过比较两个数组相同下标的值来判断，如果存在下标不等的情况则其中一个数组下标前移。</p>
+<p>根据这个思路，写出以下代码：</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nums1</span><span class="p">,</span> <span class="n">nums2</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        :type nums1: List[int]</span>
+<span class="sd">        :type nums2: List[int]</span>
+<span class="sd">        :rtype: List[int]</span>
+<span class="sd">        """</span>
+        <span class="n">nums1</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">nums2</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nums1</span><span class="p">)</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nums2</span><span class="p">):</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">nums1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">nums2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">z</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nums1</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">z</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">ret</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>在这个算法里，首先先对两个数组进行排序，然后在循环结束之前比较两个下标的值，如果值相等则说明存在相同项，下标均前移；如果不等则只前移其中一个。</p>
+<p>这样的好处在于，算法的循环始终为较小数组的长度n，这里就解决了刚刚的第二问。</p>
+<p>缺点在于，我们需要对该数组进行排序。不过python中的<code>sort</code>本身就是混合了多种排序方法的一个高效排序手段，性能上虽有一点开销，但是无疑比第一种解答要高。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="针对第三个问题">针对第三个问题<a class="anchor-link" href="#针对第三个问题">&para;</a></h2><p>针对第三个问题，如果数组特别大的情况下，那么就难以完成排序操作。这边暂时没有什么思路。。后续想到再进行补充</p>
+</div>
+</div>
+</div>
+</p>
+
+			<!-- <a href="https://twitter.com/share" class="twitter-share-button" data-via="" data-lang="en" data-size="large" data-related="">Tweet</a>
+			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script> -->
+
+			<div class="page-nav">
+				<a class="btn left" href="https://timkingnf.github.io/blog/contains-duplicate.html">
+					← 存在重复元素
+				</a>
+			</div>
+
+			<div class="comments">
+				<h2>Comments !</h2>
+			    <div id="disqus_thread"></div>
+			    <script type="text/javascript">
+			       var disqus_identifier = "intersection-of-two-arrays-ii.html";
+			       (function() {
+			       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+			       dsq.src = 'https://https-timkingnf-github-io-blog.disqus.com/embed.js';
+			       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+			      })();
+				</script>
+			</div>
+		</div>
+
+<div class="wrapper meta">
+	<ul class="nav">
+		<li><a href="https://timkingnf.github.io/blog/index.html">Home</a></li>
+		<li><a href="https://timkingnf.github.io/blog/archives.html">Archive</a></li>
+		<li><a href="https://timkingnf.github.io/blog/tags.html">Tags</a></li>
+		<li><a href="https://timkingnf.github.io/blog/categories.html">Categories</a></li>
+		<li><a href="https://timkingnf.github.io/blog/feeds/all.rss.xml">Feed</a></li>
+
+		<li><a href="https://github.com/TimKingNF">GitHub</a></li>
+		<li><a href="mailto:timking.nf@foxmail.com">Email</a></li>
+	</ul>
+
+	<div class="search_warpper">
+		<h2>Search</h2>
+		<form action="https://timkingnf.github.io/blog/search.html">
+			<div class="tipue_search_group">
+			<input type="text" name="q" class="search_text" pattern=".{3,}" title="At least 3 characters" required>
+			</div>
+		</form>
+
+		<div id="tipue_search_content"></div>
+	</div>
+</div>
+
+<div class="meta wrapper">
+	<time datetime="2018-06-26T00:00:00+08:00" pubdate>
+		2018-06-26
+	</time>
+
+
+	<ul class="tag clearfix">
+		<li><a href="https://timkingnf.github.io/blog/category/leetcode.html">LeetCode</a></li>
+
+	</ul>
+
+	<ul class="tag clearfix">
+				<li><a href="https://timkingnf.github.io/blog/tag/shu-zu.html">数组</a></li>
+				<li><a href="https://timkingnf.github.io/blog/tag/suan-fa.html">算法</a></li>
+	</ul>
+
+	<nav class="toc">
+		<div id="toc"><ul><li><a class="toc-href" href="#初步解答" title="初步解答&para;">初步解答&para;</a></li><li><a class="toc-href" href="#优化" title="优化&para;">优化&para;</a></li><li><a class="toc-href" href="#针对第三个问题" title="针对第三个问题&para;">针对第三个问题&para;</a></li></ul></div>
+	</nav>
+</div>
+
+	</article>
+</div>
+
+	<a href="#" class="scoll-top"></a>
+
+	<!-- <footer class="clearfix">
+
+		<a href="#" class="scoll-top"></a>
+
+	</footer> -->
+
+	<script>
+	  var _gaq=[['_setAccount','UA-120924939-1'],['_trackPageview']];
+	  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+	  g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+	  s.parentNode.insertBefore(g,s)}(document,'script'));
+	</script>
+
+</body>
+</html>
