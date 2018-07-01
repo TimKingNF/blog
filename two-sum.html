@@ -2,7 +2,7 @@
 <html lang="">
 <head>
 	<meta charset="utf-8"/>
-	<title>移动零 - 小花园</title>
+	<title>两数之和 - 小花园</title>
 
 	<meta name="author" content="timking" />
 	<meta name="copyright" content="timking" />
@@ -11,13 +11,13 @@
 
 
 	<meta name="twitter:card" content="summary" />
-	<meta name="twitter:title" content="移动零" />
-	<meta name="date" content="2018-06-28 00:00:00+08:00" />
+	<meta name="twitter:title" content="两数之和" />
+	<meta name="date" content="2018-06-30 00:00:00+08:00" />
 	<meta property="og:type" content="article" />
 	<meta property="og:locale" content="en" />
-	<meta property="og:published_time" content="2018-06-28 00:00:00+08:00" />
-	<meta property="og:title" content="移动零" />
-	<meta property="og:url" content="https://timkingnf.github.io/blog/move-zeroes.html" />
+	<meta property="og:published_time" content="2018-06-30 00:00:00+08:00" />
+	<meta property="og:title" content="两数之和" />
+	<meta property="og:url" content="https://timkingnf.github.io/blog/two-sum.html" />
 	<meta property="og:description" content="LeetCode - 探索 - 初级算法" />
 	<meta name="description" content="LeetCode - 探索 - 初级算法" />
 
@@ -75,13 +75,13 @@
 <div role="main" class="content clearfix">
 	<article>
 		<div class="post wrapper">
-			<h1>移动零</h1>
+			<h1>两数之和</h1>
 			<p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<blockquote><p><a href="https://leetcode-cn.com/problems/move-zeroes/description/">原文链接</a></p>
+<blockquote><p><a href="https://leetcode-cn.com/problems/two-sum/description/">原文链接</a></p>
 </blockquote>
 </div>
 </div>
@@ -90,17 +90,13 @@
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>给定一个数组 nums，编写一个函数将所有 0 移动到数组的末尾，同时保持非零元素的相对顺序。</p>
+<p>给定一个整数数组和一个目标值，找出数组中和为目标值的两个数。</p>
+<p>你可以假设每个输入只对应一种答案，且同样的元素不能被重复利用。</p>
 <p><strong>示例:</strong></p>
-<pre><code>输入: [0,1,0,3,12]
-输出: [1,3,12,0,0]</code></pre>
-<p><strong>说明:</strong></p>
-<ul>
-<li>必须在原数组上操作，不能拷贝额外的数组。</li>
-</ul>
-<ul>
-<li>尽量减少操作次数。</li>
-</ul>
+<pre><code>给定 nums = [2, 7, 11, 15], target = 9
+
+因为 nums[0] + nums[1] = 2 + 7 = 9
+所以返回 [0, 1]</code></pre>
 </div>
 </div>
 </div>
@@ -108,8 +104,7 @@
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="初步解答">初步解答<a class="anchor-link" href="#初步解答">&para;</a></h2><p>一开始看到这个题目，首先想到的就是将 <code>非0元素</code> 与 <code>0</code> 交换, 将元素前移。</p>
-<p>代码如下:</p>
+<h2 id="解答">解答<a class="anchor-link" href="#解答">&para;</a></h2><p>这边题目一开始的思路是，直接判断相差元素在后面的数组中是否存在，所以写出了如下代码:</p>
 </div>
 </div>
 </div>
@@ -119,22 +114,19 @@
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">moveZeroes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nums</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">twoSum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nums</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
         <span class="sd">"""</span>
 <span class="sd">        :type nums: List[int]</span>
-<span class="sd">        :rtype: void Do not return anything, modify nums in-place instead.</span>
+<span class="sd">        :type target: int</span>
+<span class="sd">        :rtype: List[int]</span>
 <span class="sd">        """</span>
-        <span class="n">zero_id</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-        <span class="n">zero_repeated</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)):</span>
-            <span class="k">if</span> <span class="n">zero_id</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">nums</span><span class="p">[</span><span class="n">zero_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">nums</span><span class="p">[</span><span class="n">zero_id</span><span class="p">],</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                    <span class="n">zero_id</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="n">zero_repeated</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">zero_repeated</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">elif</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">zero_id</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)):</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="n">target</span><span class="o">-</span><span class="n">element</span> <span class="ow">in</span> <span class="n">right</span><span class="p">:</span> 
+                <span class="n">index</span> <span class="o">=</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">target</span><span class="o">-</span><span class="n">element</span><span class="p">)</span>
+                <span class="k">return</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[]</span>
 </pre></div>
 </div>
 </div>
@@ -144,19 +136,9 @@
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>这里的思路是，记录了 <code>需要交换的0值</code> 下标，然后还记录了一个 <code>重复出现的0值</code> 次数，通过 <code>i值</code> 来确定下一个 <code>需要交换的0值</code> 下标。</p>
-<p>但是这样子还是太复杂了。。而且写代码时候因为思路不够清晰，出了很多问题。</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="改正">改正<a class="anchor-link" href="#改正">&para;</a></h2><p>参考了一下其他的人代码，发现我一开始的思路是对的，但是在实际编码中还是想的太复杂了。</p>
-<p>题目本质是将 <code>非0元素</code> 提前，那么只要遇到 <code>非0元素</code> 就将其交换，然后交换下标前移一位。</p>
-<p>这样最终遍历完成，也就得出了正确结果。</p>
-<p>更正后的代码如下:</p>
+<p>但是实际上，这里有一个 <code>index</code> 操作是非常消耗性能的。</p>
+<p>后来想了想，发现可以换个思路，从左值数组中找，并且更换数据结构，使用字典存放下标来加快查找效率。</p>
+<p>于是写下新的代码:</p>
 </div>
 </div>
 </div>
@@ -166,16 +148,19 @@
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">moveZeroes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nums</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">twoSum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nums</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
         <span class="sd">"""</span>
 <span class="sd">        :type nums: List[int]</span>
-<span class="sd">        :rtype: void Do not return anything, modify nums in-place instead.</span>
+<span class="sd">        :type target: int</span>
+<span class="sd">        :rtype: List[int]</span>
 <span class="sd">        """</span>
-        <span class="n">point</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)):</span>
-            <span class="k">if</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>   
-                <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">nums</span><span class="p">[</span><span class="n">point</span><span class="p">]</span> <span class="o">=</span> <span class="n">nums</span><span class="p">[</span><span class="n">point</span><span class="p">],</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">point</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">target</span> <span class="o">-</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">left</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="n">left</span><span class="p">[</span><span class="n">target</span><span class="o">-</span><span class="n">element</span><span class="p">],</span> <span class="n">i</span><span class="p">]</span>
+            <span class="n">left</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="k">return</span> <span class="p">[]</span>
 </pre></div>
 </div>
 </div>
@@ -185,7 +170,7 @@
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>这道题其实简单，但是我给钻入牛角尖了，实际上并没有那么复杂。。吸取教训。。</p>
+<p>解答完毕 :)</p>
 </div>
 </div>
 </div>
@@ -195,11 +180,11 @@
 			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script> -->
 
 			<div class="page-nav">
-				<a class="btn left" href="https://timkingnf.github.io/blog/plus-one.html">
-					← 加一
+				<a class="btn left" href="https://timkingnf.github.io/blog/move-zeroes.html">
+					← 移动零
 				</a>
-				<a class="btn right" href="https://timkingnf.github.io/blog/two-sum.html">
-					两数之和 →
+				<a class="btn right" href="https://timkingnf.github.io/blog/valid-sudoku.html">
+					有效的数独 →
 				</a>
 			</div>
 
@@ -207,7 +192,7 @@
 				<h2>Comments !</h2>
 			    <div id="disqus_thread"></div>
 			    <script type="text/javascript">
-			       var disqus_identifier = "move-zeroes.html";
+			       var disqus_identifier = "two-sum.html";
 			       (function() {
 			       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
 			       dsq.src = 'https://https-timkingnf-github-io-blog.disqus.com/embed.js';
@@ -242,8 +227,8 @@
 </div>
 
 <div class="meta wrapper">
-	<time datetime="2018-06-28T00:00:00+08:00" pubdate>
-		2018-06-28
+	<time datetime="2018-06-30T00:00:00+08:00" pubdate>
+		2018-06-30
 	</time>
 
 
@@ -258,7 +243,7 @@
 	</ul>
 
 	<nav class="toc">
-		<div id="toc"><ul><li><a class="toc-href" href="#初步解答" title="初步解答&para;">初步解答&para;</a></li><li><a class="toc-href" href="#改正" title="改正&para;">改正&para;</a></li></ul></div>
+		<div id="toc"><ul><li><a class="toc-href" href="#解答" title="解答&para;">解答&para;</a></li></ul></div>
 	</nav>
 </div>
 
