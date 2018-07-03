@@ -240,7 +240,7 @@
 <h2 id="一点备注">一点备注<a class="anchor-link" href="#一点备注">&para;</a></h2><p>在尝试第二种解法的时候，一开始我是想着通过数组来存放 <code>rows</code> 、<code>cols</code> 、<code>grids</code> 中的每一组元素，在初始化的时候用使用了 <code>[[]] * 9</code> 这样的方式来初始化空数组。</p>
 <p>但是在赋值的时候，发现造成了一个类似广播的效果。大概如下图。</p>
 <p><img alt="错误的赋值" src="https://timkingnf.github.io/blog/images/LeetCode/valid-sudoku/error_assign.gif"/></p>
-<p>一开始还没有想出来问题所在，后来想了想，发现是应该是在数组乘法操作的时候，实际上是将该数组的内存拷贝了若干次。</p>
+<p>一开始还没有想出来问题所在，后来想了想，发现是应该是在数组乘法操作的时候，实际上是将该数组的指针复制了若干次。</p>
 <p>此时原数组进行修改，自然会应用到所有的元素上去。</p>
 <p>通过打印元素的 <code>id</code> 也可以证明这一点。</p>
 </div>
@@ -254,6 +254,9 @@
 			<div class="page-nav">
 				<a class="btn left" href="https://timkingnf.github.io/blog/two-sum.html">
 					← 两数之和
+				</a>
+				<a class="btn right" href="https://timkingnf.github.io/blog/roman-to-integer.html">
+					罗马数字转整数 →
 				</a>
 			</div>
 
