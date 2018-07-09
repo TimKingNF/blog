@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="">
+<head>
+	<meta charset="utf-8"/>
+	<title>字符串中的第一个唯一字符 - 小花园</title>
+
+	<meta name="author" content="timking" />
+	<meta name="copyright" content="timking" />
+
+	<meta property="og:site_name" content="小花园" />
+
+
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="字符串中的第一个唯一字符" />
+	<meta name="date" content="2018-07-09 00:00:00+08:00" />
+	<meta property="og:type" content="article" />
+	<meta property="og:locale" content="en" />
+	<meta property="og:published_time" content="2018-07-09 00:00:00+08:00" />
+	<meta property="og:title" content="字符串中的第一个唯一字符" />
+	<meta property="og:url" content="https://timkingnf.github.io/blog/first-unique-character-in-a-string.html" />
+	<meta property="og:description" content="LeetCode - 探索 - 初级算法" />
+	<meta name="description" content="LeetCode - 探索 - 初级算法" />
+
+	<meta name="HandheldFriendly" content="True" />
+	<meta name="MobileOptimized" content="320" />
+	<meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0" />
+	<link rel="shortcut icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link rel="icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link href='https://fonts.googleapis.com/css?family=Droid+Sans:700,400|Droid+Sans+Mono' rel='stylesheet' type='text/css' />
+	<link rel="stylesheet" href="https://timkingnf.github.io/blog/theme/css/main.css" type="text/css" />
+
+	<!--[if lt IE 9]>
+		<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script src="https://cdn.rawgit.com/leafo/sticky-kit/v1.1.2/jquery.sticky-kit.min.js"></script>
+<script src="https://timkingnf.github.io/blog/theme/js/require.js"></script>
+<script type="text/javascript">
+	requirejs.config({
+		baseUrl: "theme",
+		paths: {
+			"plotly-latest": 'js/plotly-latest.min',
+			"embed-amd": "js/embed-amd",
+		},
+		waitSeconds: 0, // 设置模块等待js加载
+	});
+	require(
+		[
+
+		],
+		function(){
+			// 固定元素
+			$(".toc, .search_warpper").stick_in_parent({
+				parent: ".content"
+			});
+		}
+	)
+</script>
+
+	<link href="https://timkingnf.github.io/blog/feeds/all.rss.xml" type="application/atom+xml" rel="alternate" title="小花园 RSS Feed" />
+
+</head>
+
+<body>
+	<header class="clearfix" role="banner">
+		<!-- <div class="wrapper">
+			<h1 class="huge">
+				<a href="https://timkingnf.github.io/blog">小花园</a>
+			</h1>
+		</div> -->
+	</header>
+
+<div role="main" class="content clearfix">
+	<article>
+		<div class="post wrapper">
+			<h1>字符串中的第一个唯一字符</h1>
+			<p>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p><a href="https://leetcode-cn.com/problems/first-unique-character-in-a-string/description/">原文链接</a></p>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>给定一个字符串，找到它的第一个不重复的字符，并返回它的索引。如果不存在，则返回 -1。</p>
+<p><strong>案例:</strong></p>
+<pre><code>s = "leetcode"
+返回 0.
+
+s = "loveleetcode",
+返回 2.</code></pre>
+<p><strong>注意事项：</strong>您可以假定该字符串只包含小写字母。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="解答">解答<a class="anchor-link" href="#解答">&para;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">firstUniqChar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        :type s: str</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        """</span>
+        <span class="n">uniq</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">uniq</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">char</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="k">return</span> <span class="n">idx</span>
+            <span class="n">uniq</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">char</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>这里 <code>in</code> 的复杂度和 <code>index</code> 或 <code>find</code> 的复杂度其实是一样的，都是 <code>O(n)</code> 级别。</p>
+<p>利用了一个 <code>set</code> 来跳过某些判断，减少查找次数。</p>
+</div>
+</div>
+</div>
+</p>
+
+			<!-- <a href="https://twitter.com/share" class="twitter-share-button" data-via="" data-lang="en" data-size="large" data-related="">Tweet</a>
+			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script> -->
+
+			<div class="page-nav">
+				<a class="btn left" href="https://timkingnf.github.io/blog/reverse-integer.html">
+					← 反转整数
+				</a>
+			</div>
+
+			<div class="comments">
+				<h2>Comments !</h2>
+			    <div id="disqus_thread"></div>
+			    <script type="text/javascript">
+			       var disqus_identifier = "first-unique-character-in-a-string.html";
+			       (function() {
+			       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+			       dsq.src = 'https://https-timkingnf-github-io-blog.disqus.com/embed.js';
+			       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+			      })();
+				</script>
+			</div>
+		</div>
+
+<div class="wrapper meta">
+	<ul class="nav">
+		<li><a href="https://timkingnf.github.io/blog/index.html">Home</a></li>
+		<li><a href="https://timkingnf.github.io/blog/archives.html">Archive</a></li>
+		<li><a href="https://timkingnf.github.io/blog/tags.html">Tags</a></li>
+		<li><a href="https://timkingnf.github.io/blog/categories.html">Categories</a></li>
+		<li><a href="https://timkingnf.github.io/blog/feeds/all.rss.xml">Feed</a></li>
+
+		<li><a href="https://github.com/TimKingNF">GitHub</a></li>
+		<li><a href="mailto:timking.nf@foxmail.com">Email</a></li>
+	</ul>
+
+	<div class="search_warpper">
+		<h2>Search</h2>
+		<form action="https://timkingnf.github.io/blog/search.html">
+			<div class="tipue_search_group">
+			<input type="text" name="q" class="search_text" pattern=".{3,}" title="At least 3 characters" required>
+			</div>
+		</form>
+
+		<div id="tipue_search_content"></div>
+	</div>
+</div>
+
+<div class="meta wrapper">
+	<time datetime="2018-07-09T00:00:00+08:00" pubdate>
+		2018-07-09
+	</time>
+
+
+	<ul class="tag clearfix">
+		<li><a href="https://timkingnf.github.io/blog/category/leetcode.html">LeetCode</a></li>
+
+	</ul>
+
+	<ul class="tag clearfix">
+				<li><a href="https://timkingnf.github.io/blog/tag/zi-fu-chuan.html">字符串</a></li>
+				<li><a href="https://timkingnf.github.io/blog/tag/suan-fa.html">算法</a></li>
+	</ul>
+
+	<nav class="toc">
+		<div id="toc"><ul><li><a class="toc-href" href="#解答" title="解答&para;">解答&para;</a></li></ul></div>
+	</nav>
+</div>
+
+	</article>
+</div>
+
+	<a href="#" class="scoll-top"></a>
+
+	<!-- <footer class="clearfix">
+
+		<a href="#" class="scoll-top"></a>
+
+	</footer> -->
+
+	<script>
+	  var _gaq=[['_setAccount','UA-120924939-1'],['_trackPageview']];
+	  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+	  g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+	  s.parentNode.insertBefore(g,s)}(document,'script'));
+	</script>
+
+</body>
+</html>

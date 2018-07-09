@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="">
+<head>
+	<meta charset="utf-8"/>
+	<title>反转整数 - 小花园</title>
+
+	<meta name="author" content="timking" />
+	<meta name="copyright" content="timking" />
+
+	<meta property="og:site_name" content="小花园" />
+
+
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="反转整数" />
+	<meta name="date" content="2018-07-08 00:00:00+08:00" />
+	<meta property="og:type" content="article" />
+	<meta property="og:locale" content="en" />
+	<meta property="og:published_time" content="2018-07-08 00:00:00+08:00" />
+	<meta property="og:title" content="反转整数" />
+	<meta property="og:url" content="https://timkingnf.github.io/blog/reverse-integer.html" />
+	<meta property="og:description" content="LeetCode - 探索 - 初级算法" />
+	<meta name="description" content="LeetCode - 探索 - 初级算法" />
+
+	<meta name="HandheldFriendly" content="True" />
+	<meta name="MobileOptimized" content="320" />
+	<meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0" />
+	<link rel="shortcut icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link rel="icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link href='https://fonts.googleapis.com/css?family=Droid+Sans:700,400|Droid+Sans+Mono' rel='stylesheet' type='text/css' />
+	<link rel="stylesheet" href="https://timkingnf.github.io/blog/theme/css/main.css" type="text/css" />
+
+	<!--[if lt IE 9]>
+		<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script src="https://cdn.rawgit.com/leafo/sticky-kit/v1.1.2/jquery.sticky-kit.min.js"></script>
+<script src="https://timkingnf.github.io/blog/theme/js/require.js"></script>
+<script type="text/javascript">
+	requirejs.config({
+		baseUrl: "theme",
+		paths: {
+			"plotly-latest": 'js/plotly-latest.min',
+			"embed-amd": "js/embed-amd",
+		},
+		waitSeconds: 0, // 设置模块等待js加载
+	});
+	require(
+		[
+
+		],
+		function(){
+			// 固定元素
+			$(".toc, .search_warpper").stick_in_parent({
+				parent: ".content"
+			});
+		}
+	)
+</script>
+
+	<link href="https://timkingnf.github.io/blog/feeds/all.rss.xml" type="application/atom+xml" rel="alternate" title="小花园 RSS Feed" />
+
+</head>
+
+<body>
+	<header class="clearfix" role="banner">
+		<!-- <div class="wrapper">
+			<h1 class="huge">
+				<a href="https://timkingnf.github.io/blog">小花园</a>
+			</h1>
+		</div> -->
+	</header>
+
+<div role="main" class="content clearfix">
+	<article>
+		<div class="post wrapper">
+			<h1>反转整数</h1>
+			<p>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p><a href="https://leetcode-cn.com/problems/reverse-integer/description/">原文链接</a></p>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>给定一个 32 位有符号整数，将整数中的数字进行反转。</p>
+<p><strong>示例 1:</strong></p>
+<pre><code>输入: 123
+输出: 321</code></pre>
+<p><strong>示例 2:</strong></p>
+<pre><code>输入: -123
+输出: -321</code></pre>
+<p><strong>示例 3:</strong></p>
+<pre><code>输入: 120
+输出: 21</code></pre>
+<p><strong>注意:</strong></p>
+<p>假设我们的环境只能存储 32 位有符号整数，其数值范围是 [ $&minus;2^{31}$, $2^{31}$ &minus; 1 ]。根据这个假设，如果反转后的整数溢出，则返回 0。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="解答">解答<a class="anchor-link" href="#解答">&para;</a></h2><p>这边主要就是注意几个条件，当值为负数的情况下、当值越过最大值的时候。</p>
+<p>这边我一开始的代码是这个样子的。</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        :type x: int</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        """</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">flag</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">))[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">flag</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="o">**</span><span class="mi">31</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">a</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="优化">优化<a class="anchor-link" href="#优化">&para;</a></h2><p>当然这里存在几个问题，我直接是直接使用了字符串将其绝对值反转, 另外，在最大值上其实也有问题;</p>
+<p>假设代码运行只支持32位整形，那么实际上这段代码是不可执行的，因为在反转之后强转为 <code>int</code> 的时候就会溢出，这边实际上应该考虑这个情况。</p>
+<p>这里修改一下代码:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        :type x: int</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        """</span>
+        <span class="n">int_max</span> <span class="o">=</span> <span class="mi">2147483647</span> <span class="c1"># 2**31 - 1</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">flag</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">x</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">pop</span> <span class="o">=</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">10</span> <span class="c1"># 倒序，取个位数上的值</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">//</span> <span class="mi">10</span> <span class="c1"># 整除 10 </span>
+            <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="n">int_max</span><span class="o">/</span><span class="mi">10</span> <span class="ow">or</span> <span class="p">(</span><span class="n">r</span> <span class="o">==</span> <span class="n">int_max</span><span class="o">/</span><span class="mi">10</span> <span class="ow">and</span> <span class="n">pop</span> <span class="o">&gt;</span> <span class="mi">7</span><span class="p">):</span>
+                <span class="k">return</span> <span class="mi">0</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">+</span> <span class="n">pop</span>
+        <span class="k">return</span> <span class="n">r</span> <span class="o">*</span> <span class="n">flag</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>这里需要在计算 <code>r = r * 10 + pop</code> 之前就判断，是否有溢出的可能, 满足以下任意条件就会溢出。</p>
+<ul>
+<li>当前 <code>r</code> 值大于 <code>int_max / 10</code> 那么最后一位不管是什么都溢出</li>
+</ul>
+<ul>
+<li>当前 <code>r</code> 值等于 <code>int_max / 10</code> 但最后一位是大于7，则超过最大数字溢出</li>
+</ul>
+</div>
+</div>
+</div>
+</p>
+
+			<!-- <a href="https://twitter.com/share" class="twitter-share-button" data-via="" data-lang="en" data-size="large" data-related="">Tweet</a>
+			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script> -->
+
+			<div class="page-nav">
+				<a class="btn left" href="https://timkingnf.github.io/blog/rotate-image.html">
+					← 旋转图像
+				</a>
+				<a class="btn right" href="https://timkingnf.github.io/blog/first-unique-character-in-a-string.html">
+					字符串中的第一个唯一字符 →
+				</a>
+			</div>
+
+			<div class="comments">
+				<h2>Comments !</h2>
+			    <div id="disqus_thread"></div>
+			    <script type="text/javascript">
+			       var disqus_identifier = "reverse-integer.html";
+			       (function() {
+			       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+			       dsq.src = 'https://https-timkingnf-github-io-blog.disqus.com/embed.js';
+			       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+			      })();
+				</script>
+			</div>
+		</div>
+
+<div class="wrapper meta">
+	<ul class="nav">
+		<li><a href="https://timkingnf.github.io/blog/index.html">Home</a></li>
+		<li><a href="https://timkingnf.github.io/blog/archives.html">Archive</a></li>
+		<li><a href="https://timkingnf.github.io/blog/tags.html">Tags</a></li>
+		<li><a href="https://timkingnf.github.io/blog/categories.html">Categories</a></li>
+		<li><a href="https://timkingnf.github.io/blog/feeds/all.rss.xml">Feed</a></li>
+
+		<li><a href="https://github.com/TimKingNF">GitHub</a></li>
+		<li><a href="mailto:timking.nf@foxmail.com">Email</a></li>
+	</ul>
+
+	<div class="search_warpper">
+		<h2>Search</h2>
+		<form action="https://timkingnf.github.io/blog/search.html">
+			<div class="tipue_search_group">
+			<input type="text" name="q" class="search_text" pattern=".{3,}" title="At least 3 characters" required>
+			</div>
+		</form>
+
+		<div id="tipue_search_content"></div>
+	</div>
+</div>
+
+<div class="meta wrapper">
+	<time datetime="2018-07-08T00:00:00+08:00" pubdate>
+		2018-07-08
+	</time>
+
+
+	<ul class="tag clearfix">
+		<li><a href="https://timkingnf.github.io/blog/category/leetcode.html">LeetCode</a></li>
+
+	</ul>
+
+	<ul class="tag clearfix">
+				<li><a href="https://timkingnf.github.io/blog/tag/zi-fu-chuan.html">字符串</a></li>
+				<li><a href="https://timkingnf.github.io/blog/tag/suan-fa.html">算法</a></li>
+	</ul>
+
+	<nav class="toc">
+		<div id="toc"><ul><li><a class="toc-href" href="#解答" title="解答&para;">解答&para;</a></li><li><a class="toc-href" href="#优化" title="优化&para;">优化&para;</a></li></ul></div>
+	</nav>
+</div>
+
+	</article>
+</div>
+
+	<a href="#" class="scoll-top"></a>
+
+	<!-- <footer class="clearfix">
+
+		<a href="#" class="scoll-top"></a>
+
+	</footer> -->
+
+	<script>
+	  var _gaq=[['_setAccount','UA-120924939-1'],['_trackPageview']];
+	  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+	  g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+	  s.parentNode.insertBefore(g,s)}(document,'script'));
+	</script>
+
+</body>
+</html>
