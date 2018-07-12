@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="">
+<head>
+	<meta charset="utf-8"/>
+	<title>约瑟夫斯问题 - 小花园</title>
+
+	<meta name="author" content="timking" />
+	<meta name="copyright" content="timking" />
+
+	<meta property="og:site_name" content="小花园" />
+
+
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="约瑟夫斯问题" />
+	<meta name="date" content="2018-07-11 00:00:00+08:00" />
+	<meta property="og:type" content="article" />
+	<meta property="og:locale" content="en" />
+	<meta property="og:published_time" content="2018-07-11 00:00:00+08:00" />
+	<meta property="og:title" content="约瑟夫斯问题" />
+	<meta property="og:url" content="https://timkingnf.github.io/blog/josephus-problem.html" />
+	<meta property="og:description" content="面试中遇到的题目" />
+	<meta name="description" content="面试中遇到的题目" />
+
+	<meta name="HandheldFriendly" content="True" />
+	<meta name="MobileOptimized" content="320" />
+	<meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0" />
+	<link rel="shortcut icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link rel="icon" href="https://timkingnf.github.io/blog/theme/favicon.ico" type="image/x-icon" />
+	<link href='https://fonts.googleapis.com/css?family=Droid+Sans:700,400|Droid+Sans+Mono' rel='stylesheet' type='text/css' />
+	<link rel="stylesheet" href="https://timkingnf.github.io/blog/theme/css/main.css" type="text/css" />
+
+	<!--[if lt IE 9]>
+		<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script src="https://cdn.rawgit.com/leafo/sticky-kit/v1.1.2/jquery.sticky-kit.min.js"></script>
+<script src="https://timkingnf.github.io/blog/theme/js/require.js"></script>
+<script type="text/javascript">
+	requirejs.config({
+		baseUrl: "theme",
+		paths: {
+			"plotly-latest": 'js/plotly-latest.min',
+			"embed-amd": "js/embed-amd",
+		},
+		waitSeconds: 0, // 设置模块等待js加载
+	});
+	require(
+		[
+
+		],
+		function(){
+			// 固定元素
+			$(".toc, .search_warpper").stick_in_parent({
+				parent: ".content"
+			});
+		}
+	)
+</script>
+
+	<link href="https://timkingnf.github.io/blog/feeds/all.rss.xml" type="application/atom+xml" rel="alternate" title="小花园 RSS Feed" />
+
+</head>
+
+<body>
+	<header class="clearfix" role="banner">
+		<!-- <div class="wrapper">
+			<h1 class="huge">
+				<a href="https://timkingnf.github.io/blog">小花园</a>
+			</h1>
+		</div> -->
+	</header>
+
+<div role="main" class="content clearfix">
+	<article>
+		<div class="post wrapper">
+			<h1>约瑟夫斯问题</h1>
+			
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>题目如下：</strong></p>
+<p>n个人(编号1~n)围成一圈从编号为1的开始报数，从1报数到m，报到m的人出来，下一个人继续重新从1开始报数，编程求最后一个留下的人的编号</p>
+<p>如n=3，m=4</p>
+<p>第一次出队：1</p>
+<p>第二次出队：3</p>
+<p>最后留下：2</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="解答">解答<a class="anchor-link" href="#解答">&para;</a></h2><p>该题的解答思路在于，完成第一步 $m\%n$ 之后，下一个需要重新开始报号。</p>
+<p>这里有几种方法:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="解答一">解答一<a class="anchor-link" href="#解答一">&para;</a></h3><p>第一种利用数组完成，在第一步的人出队之后（设其下标为 <code>index</code>），将其后面的人 <code>[index+1:]</code> 切片移到前面的人 <code>[:index]</code> 之前，重新构造为第二步的数组。</p>
+<p>代码如下:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="p">(</span><span class="n">m</span>  <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">a</span><span class="p">[:</span><span class="n">index</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="解答二">解答二<a class="anchor-link" href="#解答二">&para;</a></h3><p>第二种同样利用数组，可以通过移动下标实现。 
+设第一次 <code>index</code> 为 0，表示从第一个开始算起，第一步出队的人的位置为 $(m-1)\%n$, 记为 <code>A1</code>,  <code>A1</code> 出队之后 <code>A1</code> 后面的人都往前移一位。<br/>
+第二步出队的人位置为 $(A1+m-1)\%(n-1)$, 表示从上一步出队的人的位置开始算起。<br/>
+由此可以得出，每一步出队的都是上一步的index计算得出, 得 $(index+m-1)\%len(list)$</p>
+<p>代码如下:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+    <span class="n">l_number</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">l_number</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="p">(</span><span class="n">index</span> <span class="o">-</span><span class="mi">1</span> <span class="o">+</span> <span class="n">m</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">l_number</span><span class="p">)</span>
+        <span class="n">l_number</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">l_number</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="解答三">解答三<a class="anchor-link" href="#解答三">&para;</a></h3><p>第三种，则在第二种的基础上，更进一步，通过数学代换直接得到每一步应该出队的人。</p>
+<p>假设从0排列开始，第一次排列为:</p>
+<p><code>0, 1, 2, 3, 4 ... n-3, n-2, n-1</code> (共n项)</p>
+<p>此时出队的人的编号为 $(m-1)\%n$ 。</p>
+<p>设第二次应该从 k 开始算起，则有式子 $k=m\%n$, 同时第二次的排列为:</p>
+<p><code>k, k+1, k+2, K+3, ... k-3, k-2</code> (共n-1项)</p>
+<p>此时设 k = 0, 则该排列可以简单代换为 <code>n-1</code> 项的求出队问题:</p>
+<p><code>0, 1, 2, 3, ..., n-3, n-2</code> (共n-1项)</p>
+<p>同样的，往下代换。 即，对于<code>n</code>个人报数的问题，可以分解为先求解<code>（n&ndash;1）</code>个人报数的子问题；而对于<code>（n&ndash;1）</code>个人报数的子问题，又可分解为先求<code>(（N&ndash;1）&ndash;1)</code>人个报数的子问题。</p>
+<p>设当人数只有1个人的时候，不管怎么数编号都为 0:</p>
+<p>则有 $f(1) = 0$。</p>
+<p>当人数有2个人的时候，则有上一步的人的编号加 m，即:</p>
+<p>$f(2) = (f(1) + m)\%n$</p>
+<p>以此类推，则有公式:</p>
+<p>$f(1) = 0 \\
+f(x) = (f(x-1) + m)\%n \qquad (x&gt;1)$</p>
+<p>最后我们实际编号是从1开始，则将结果加一。</p>
+<p>代码如下:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">s</span> <span class="o">+</span> <span class="n">m</span><span class="p">)</span> <span class="o">%</span> <span class="n">i</span>
+        <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">s</span><span class="o">+</span><span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: 'center'," +
+        "    displayIndent: '0em'," +
+        "    showMathMenu: true," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['$','$'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        processEnvironments: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        " linebreaks: { automatic: true, width: '95% container' }, " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'black ! important'} }" +
+        "    } " +
+        "}); ";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+
+
+			<!-- <a href="https://twitter.com/share" class="twitter-share-button" data-via="" data-lang="en" data-size="large" data-related="">Tweet</a>
+			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script> -->
+
+			<div class="page-nav">
+				<a class="btn left" href="https://timkingnf.github.io/blog/string-ascii-lowercase-arrange.html">
+					← 小写字符排列组合
+				</a>
+			</div>
+
+			<div class="comments">
+				<h2>Comments !</h2>
+			    <div id="disqus_thread"></div>
+			    <script type="text/javascript">
+			       var disqus_identifier = "josephus-problem.html";
+			       (function() {
+			       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+			       dsq.src = 'https://https-timkingnf-github-io-blog.disqus.com/embed.js';
+			       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+			      })();
+				</script>
+			</div>
+		</div>
+
+<div class="wrapper meta">
+	<ul class="nav">
+		<li><a href="https://timkingnf.github.io/blog/index.html">Home</a></li>
+		<li><a href="https://timkingnf.github.io/blog/archives.html">Archive</a></li>
+		<li><a href="https://timkingnf.github.io/blog/tags.html">Tags</a></li>
+		<li><a href="https://timkingnf.github.io/blog/categories.html">Categories</a></li>
+		<li><a href="https://timkingnf.github.io/blog/feeds/all.rss.xml">Feed</a></li>
+
+		<li><a href="https://github.com/TimKingNF">GitHub</a></li>
+		<li><a href="mailto:timking.nf@foxmail.com">Email</a></li>
+	</ul>
+
+	<div class="search_warpper">
+		<h2>Search</h2>
+		<form action="https://timkingnf.github.io/blog/search.html">
+			<div class="tipue_search_group">
+			<input type="text" name="q" class="search_text" pattern=".{3,}" title="At least 3 characters" required>
+			</div>
+		</form>
+
+		<div id="tipue_search_content"></div>
+	</div>
+</div>
+
+<div class="meta wrapper">
+	<time datetime="2018-07-11T00:00:00+08:00" pubdate>
+		2018-07-11
+	</time>
+
+
+	<ul class="tag clearfix">
+		<li><a href="https://timkingnf.github.io/blog/category/mian-shi.html">面试</a></li>
+
+	</ul>
+
+	<ul class="tag clearfix">
+				<li><a href="https://timkingnf.github.io/blog/tag/suan-fa.html">算法</a></li>
+	</ul>
+
+	<nav class="toc">
+		<div id="toc"><ul><li><a class="toc-href" href="#解答" title="解答&para;">解答&para;</a><ul><li><a class="toc-href" href="#解答一" title="解答一&para;">解答一&para;</a></li><li><a class="toc-href" href="#解答二" title="解答二&para;">解答二&para;</a></li><li><a class="toc-href" href="#解答三" title="解答三&para;">解答三&para;</a></li></ul></li></ul></div>
+	</nav>
+</div>
+
+	</article>
+</div>
+
+	<a href="#" class="scoll-top"></a>
+
+	<!-- <footer class="clearfix">
+
+		<a href="#" class="scoll-top"></a>
+
+	</footer> -->
+
+	<script>
+	  var _gaq=[['_setAccount','UA-120924939-1'],['_trackPageview']];
+	  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+	  g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+	  s.parentNode.insertBefore(g,s)}(document,'script'));
+	</script>
+
+</body>
+</html>
