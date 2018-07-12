@@ -77,18 +77,23 @@ SOCIAL = (
 * my_search: 本地搜索, 由于tipie_search 7.0 不支持json的原因，改写了部分的tipue_search的代码
     https://github.com/getpelican/pelican-plugins/tree/master/tipue_search
     http://www.tipue.com/search/
+* ipynb2pelican: 更好的支持ipynb
+    https://github.com/peijunz/ipynb2pelican
 '''
-MARKUP = ('md', )
+# MARKUP = ('md', )
+MARKUP = ('ipynb', 'md')
 MD_EXTENSIONS = 'extra'
 PLUGIN_PATHS = ['./plugins', './my-plugins']
 PLUGINS = [
-    'liquid_tags.notebook',
-    'ipynb.liquid',
+    # 'liquid_tags.notebook',
+    # 'ipynb.liquid',
     'tag_cloud',
     'pelican-toc',
     "neighbors",
     'sitemap',
     'my-search',
+    "render_math",
+    "ipynb2pelican"
 ]
 
 
