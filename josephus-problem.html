@@ -129,10 +129,10 @@
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="解答二">解答二<a class="anchor-link" href="#解答二">&para;</a></h3><p>第二种同样利用数组，可以通过移动下标实现。 
-设第一次 <code>index</code> 为 0，表示从第一个开始算起，第一步出队的人的位置为 $(m-1)\%n$, 记为 <code>A1</code>,  <code>A1</code> 出队之后 <code>A1</code> 后面的人都往前移一位。<br/>
-第二步出队的人位置为 $(A1+m-1)\%(n-1)$, 表示从上一步出队的人的位置开始算起。<br/>
-由此可以得出，每一步出队的都是上一步的index计算得出, 得 $(index+m-1)\%len(list)$</p>
+<h3 id="解答二">解答二<a class="anchor-link" href="#解答二">&para;</a></h3><p>第二种同样利用数组，可以通过移动下标实现。</p>
+<p>设第一次 <code>index</code> 为 0，表示从第一个开始算起，第一步出队的人的位置为 $(m-1)\%n$, 记为 <code>A1</code>,  <code>A1</code> 出队之后 <code>A1</code> 后面的人都往前移一位。</p>
+<p>第二步出队的人位置为  $(A1+m-1)\%(n-1)$ , 表示从上一步出队的人的位置开始算起。<br/>
+由此可以得出，每一步出队的都是上一步的index计算得出, 得  $(index+m-1)\%len(list)$</p>
 <p>代码如下:</p>
 </div>
 </div>
@@ -233,6 +233,9 @@ f(x) = (f(x-1) + m)\%n \qquad (x&gt;1)$</p>
 			<div class="page-nav">
 				<a class="btn left" href="https://timkingnf.github.io/blog/string-ascii-lowercase-arrange.html">
 					← 小写字符排列组合
+				</a>
+				<a class="btn right" href="https://timkingnf.github.io/blog/Asynchronous Computation: Web Servers + Dask.html">
+					【译】异步计算：Web服务器+ Dask →
 				</a>
 			</div>
 
